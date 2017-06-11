@@ -27,7 +27,7 @@ var cacheRedisConf = make(map[string]map[string]string, 0)
 
 const (
 	MAXFIELDNUMBER = 100000
-	SELF_CONF_FILE = `.` + string(os.PathSeparator) + `iredis.toml`
+	SELF_CONF_FILE = `.` + string(os.PathSeparator) + `redisvo.toml`
 )
 
 func (c Int64Slice) Len() int {

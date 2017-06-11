@@ -16,7 +16,7 @@ func main() {
 		if err := recover(); err != nil {
 			fmt.Println("run time panic: %v", err)
 		}
-		fmt.Println("iRedis Exited ...\n")
+		fmt.Println("redisvo Exited ...\n")
 	}()
 	// route
 	http.HandleFunc("/login", login)

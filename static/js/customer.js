@@ -794,7 +794,7 @@ $(document).ready(function() {
 				        				term.echo("Pipeline commands should contain <findstr or grep>").resume();
 				        				connection.close();
 				        				term.echo("Bye... ").resume();
-				        				term.set_prompt('iRedis> ');
+				        				term.set_prompt('redisvo> ');
 				        			}
 			        				connection.send(server_info + '_' + substr);
 			        			};
@@ -804,11 +804,11 @@ $(document).ready(function() {
 						    };
 							connection.onclose = function() {
 								term.echo("Bye... ").resume();
-								term.set_prompt('iRedis> ');
+								term.set_prompt('redisvo> ');
 							};
 							connection.onerror = function() {
 								term.echo("Bye... ").resume();
-								term.set_prompt('iRedis> ');
+								term.set_prompt('redisvo> ');
 							};
 			        	} else {
 			        		try {
@@ -832,7 +832,7 @@ $(document).ready(function() {
 			    }, {
 			        name: 'js_demo',
 			        height: 400,
-			        prompt: 'iRedis> ',
+			        prompt: 'redisvo> ',
 			        enabled: true,
 			        keypress: function(e,term) {
 		        		if((e.keyCode == 26 || e.keyCode == 3) && e.ctrlKey) {
@@ -841,7 +841,7 @@ $(document).ready(function() {
 				    			connection.send("Ctrl+C");
 				    			connection.close();
 				    			e.key = "";
-				    			term.set_prompt('iRedis> ');
+				    			term.set_prompt('redisvo> ');
 				    		}
 		        		}
 			        }
