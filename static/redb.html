@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>iRedis WebUi</title>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta http-equiv="Content-Language" content="en">  
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="iRedis WebUi">
+    <meta name="summary" content="iRedis WebUi">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="icon" sizes="32x32" href="/static/images/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon-180x180-precomposed.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/static/images/apple-touch-icon-152x152-precomposed.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/static/images/apple-touch-icon-144x144-precomposed.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/static/images/apple-touch-icon-120x120-precomposed.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/static/images/apple-touch-icon-114x114-precomposed.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/static/images/apple-touch-icon-76x76-precomposed.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/static/images/apple-touch-icon-72x72-precomposed.png">
+    <link rel="apple-touch-icon" href="./images/apple-touch-icon-precomposed-57x57.png">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/customer.css">
+    <link rel="stylesheet" href="/static/css/jquery.terminal-1.0.6.min.css">
+    <link href="/static/vendor/Fixed-Header-Table/css/defaultTheme.css" rel="stylesheet" media="screen" />
+    <link href="/static/vendor/Fixed-Header-Table/demo/css/myTheme.css" rel="stylesheet" media="screen" />
+    <link rel="stylesheet" href="/static/vendor/font-awesome-4.7.0/css/font-awesome.css">
+    <link rel="stylesheet" href="/static/vendor/jquery-ui-1.12.1/jquery-ui.min.css">
+</head>
+<body>
+    <template id="template-context-menu-item">
+        <li class="context-menu-item">
+            <slot></slot>
+        </li>
+    </template>
+    <template id="template-context-menu">
+        <ul id="context-menu" v-click-outside="">
+            <context-menu-item @click="modify()">
+                Modify Key of Name
+            </context-menu-item>
+            <context-menu-item @click="chgwidht1" @mouseleave="chgwidht2">
+                Remove the Key
+                <div class="menu-ok" style="margin-left: auto;" v-show="upHere">
+                    <button type="submit" class="button-menu-ok" v-cloak @click="remove()">OK</button>
+                </div>
+            </context-menu-item>
+            <context-menu-item @click="refresh()">
+                Refresh the Key
+            </context-menu-item>
+        </ul>
+    </template>
+    <nav class="navbar navbar-fixed-top navbar-default" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" id="navbar-nlogo" @click="back"> iRedis</a>
+            </div>
+            <form class="navbar-form navbar-left" style="margin-top:5px;margin-bottom:0px;" role="search" method="get">
+                <div class="input-group">
+                    <input id="search_input" type="text" class="form-control input-sm" placeholder="Key name or patterns(e.g. users*)" v-model="search_value" v-on:keyup="searchTypeName()">
+                </div>
+            </form>
+            <ul class="nav navbar-nav navbar-left">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false"> DB <span class="caret"></span></a>
+                    <ul id="dbdropdown" class="dropdown-menu" role="menu" style="min-width:5px!important">
+                        <!-- vue -->
+                        <li><a><i class="fa fa-database"> </i> <span class="search-option">0</span> <i class="fa fa-check"></i></a></li> 
+                        <li><a><i class="fa fa-database"> </i> <span class="search-option">1</span> <i class="fa fa-check"></i></a></li> 
+                        <li><a><i class="fa fa-database"> </i> <span class="search-option">2</span> <i class="fa fa-check"></i></a></li>
+                        <li><a><i class="fa fa-database"> </i> <span class="search-option">3</span> <i class="fa fa-check"></i></a></li>
+                        <li><a><i class="fa fa-database"> </i> <span class="search-option">4</span> <i class="fa fa-check"></i></a></li>
+                        <li><a><i class="fa fa-database"> </i> <span class="search-option">5</span> <i class="fa fa-check"></i></a></li>
+                        <li><a><i class="fa fa-database"> </i> <span class="search-option">6</span> <i class="fa fa-check"></i></a></li>
+                        <li><a><i class="fa fa-database"> </i> <span class="search-option">7</span> <i class="fa fa-check"></i></a></li> 
+                        <li><a><i class="fa fa-database"> </i> <span class="search-option">8</span> <i class="fa fa-check"></i></a></li>
+                        <li><a><i class="fa fa-database"> </i> <span class="search-option">9</span> <i class="fa fa-check"></i></a></li>
+                        <li><a><i class="fa fa-database"> </i> <span class="search-option">10</span> <i class="fa fa-check"></i></a></li>
+                        <li><a><i class="fa fa-database"> </i> <span class="search-option">11</span> <i class="fa fa-check"></i></a></li> 
+                        <li><a><i class="fa fa-database"> </i> <span class="search-option">12</span> <i class="fa fa-check"></i></a></li>
+                        <li><a><i class="fa fa-database"> </i> <span class="search-option">13</span> <i class="fa fa-check"></i></a></li> 
+                        <li><a><i class="fa fa-database"> </i> <span class="search-option">14</span> <i class="fa fa-check"></i></a></li>
+                        <li><a><i class="fa fa-database"> </i> <span class="search-option">15</span> <i class="fa fa-check"></i></a></li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right" id="nav_show">
+                <li>
+                    <a v-on:click="contentshow()"><i class="fa fa-folder-open-o"> </i> Content</a>   
+                </li>
+                <li>
+                    <a v-on:click="terminalshow()"><i class="fa fa-laptop"> </i> Terminal</a>  
+                </li>
+                <li>
+                    <a v-on:click="configshow()"><i class="fa fa-sun-o"> </i> Config</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container bs-docs-container">
+        <div class="row">
+            <div class="col-md-3" id="leftbar">
+                <table class="table table-striped table-hover" id="type-name">
+                    <thead>
+                        <tr>
+                            <th style="width:75px"> type </th>
+                            <th>
+                                name
+                                <span class="pull-right">
+                                    <i data-target="#addtypename" data-toggle="modal" href="#" class="fa fa-plus-square-o" ></i>
+                                </span>
+                                <!-- Modal -->
+                                <div class="modal fade" id="addtypename" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                  <div class="modal-dialog">
+                                    <div class="modal-content">
+                                      <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                        <h4 class="modal-title" id="myModalLabel">Add Names</h4>
+                                      </div>
+                                      <div class="modal-body">
+                                        <form class="form-horizontal" role="form">
+                                            <div class="form-group">
+                                                <label for="firstname" class="col-sm-2 control-label">Name:</label>
+                                                <div class="col-sm-10">
+                                                  <input type="text" class="form-control" id="server-name">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="lastname" class="col-sm-2 control-label">Type: </label>
+                                                <div class="col-sm-10">
+                                                    <select ng-model='discussionsSelect' class='form-control'>
+                                                        <option value="string">string</option>
+                                                        <option value="hash">hash</option>
+                                                        <option value="list">list</option>
+                                                        <option value="set">set</option>
+                                                        <option value="zset">zset</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </form>
+                                      </div>
+                                      <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                        <button v-cloak v-on:click="addkey()" type="submit" class="btn btn-primary">OK</button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>                     
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       <tr v-if="keys.length" id="retriever-task-{{ index }}" v-for="(index, key) in keys" @click="hideContextMenu(index, $event)"
+                           @contextmenu.prevent="showContextMenu(index,key,$event)">
+                            <td v-on:click="getKeysByTypeName(key.type, key.name)"> <span class="{{ key.type }}" v-text="key.type"> </span> </td>
+                            <td v-on:click="getMoreTypeName()" v-if='key.name == "More"'> <a href="#" v-text="key.name"> </a> </td>
+                            <td v-click-outside="" v-on:keyup="resizeInput" v-on:keyup.enter="modifySubmit(key.type)" v-on:click="getKeysByTypeName(key.type, key.name)" v-else v-html="key.name"> </td>
+                            <context-menu></context-menu>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-3" id="midbar">
+                <table class="table table-striped table-hover" id="keys-name">
+                    <thead>
+                        <tr>
+                            <th v-show="zset_index_show" v-text="zset_index"></th>
+                            <th v-cloak width="65" v-text="index"> </th>
+                            <th>
+                                <span v-cloak v-text="keytitle"> </span>
+                                <span class="pull-right">
+                                    <i data-target="#{{ keytitle }}" data-toggle="modal" href="#" class="fa fa-plus-square-o" ></i>
+                                </span>
+                                <div class="modal fade" id="key" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                  <div class="modal-dialog modal-md">
+                                    <div class="modal-content">
+                                      <div class="modal-body">
+                                        <form class="form-horizontal" role="form">
+                                            <div class="form-group">
+                                                <label for="lastname" class="col-sm-2 control-label" style="text-align: end;">Key:</label>
+                                                <div class="col-sm-10">
+                                                    <input type="text" class="form-control">
+                                                </div>
+                                            </div>
+                                        </form>
+                                      </div>
+                                      <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                        <button v-on:click="addKeyByTypeAndName()" type="submit" class="btn btn-primary">Insert Key</button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div class="modal fade" id="item" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                  <div class="modal-dialog modal-md">
+                                    <div class="modal-content">
+                                      <div class="modal-body">
+                                        <form class="form-horizontal" role="form">
+                                            <div class="form-group">
+                                                <label for="lastname" class="col-sm-2 control-label" style="text-align: end;">Value:</label>
+                                                <div class="col-sm-10">
+                                                    <input type="text" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="lastname" class="col-sm-2 control-label" style="text-align: end;">Insert To:</label>
+                                                <div class="col-sm-10">
+                                                    <select ng-model='discussionsSelect' class='form-control'>
+                                                        <option value='head'>head</option>
+                                                        <option value='tail'>tail</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </form>
+                                      </div>
+                                      <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                        <button v-on:click="addKeyByTypeAndName()" type="submit" class="btn btn-primary">Insert Item</button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div class="modal fade" id="member" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                  <div class="modal-dialog modal-md">
+                                    <div class="modal-content">
+                                      <div class="modal-body">
+                                        <form class="form-horizontal" role="form">
+                                            <div class="form-group">
+                                                <label for="lastname" class="col-sm-2 control-label" style="text-align: end;">Value:</label>
+                                                <div class="col-sm-10">
+                                                    <input type="text" class="form-control">
+                                                </div>
+                                            </div>
+                                        </form>
+                                      </div>
+                                      <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                        <button v-on:click="addKeyByTypeAndName()" type="submit" class="btn btn-primary">Insert Member</button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div> 
+
+                                <div class="modal fade" id="zmember" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                  <div class="modal-dialog modal-md">
+                                    <div class="modal-content">
+                                      <div class="modal-body">
+                                        <form class="form-horizontal" role="form">
+                                            <div class="form-group">
+                                                <label for="lastname" class="col-sm-2 control-label" style="text-align: end;">Value:</label>
+                                                <div class="col-sm-10">
+                                                    <input name="value"  type="text" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="lastname" class="col-sm-2 control-label" style="text-align: end;">Score:</label>
+                                                <div class="col-sm-10">
+                                                    <input name="score" type="text" class="form-control" value="0">
+                                                </div>
+                                            </div>
+                                        </form>
+                                      </div>
+                                      <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                        <button v-on:click="addKeyByTypeAndName()" type="submit" class="btn btn-primary">Insert Zmember</button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>                           
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-if="keys.length" id="retriever-task-{{ index }}" v-for="(index, key) in keys">
+                            <td v-show="zset_index_show" v-text="key.index"> </td>
+                            <td v-text="key.score"> </td>
+                            <td v-cloak v-on:click="getMoreFieldName()" v-if='key.name == "More"'> <a href="#" v-text="key.name"> </a> </td>
+                            <td v-cloak v-on:click="getContentByKeys(key.name, key.score)" v-else v-text="key.name"> </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6" id="rightbar">
+                <a v-on:click="saveContent()"> <i class="fa fa-floppy-o"></i> </a>
+                <a class="faq-links"> <i class="fa fa-plus-square-o"></i></a>
+                <textarea v-model="message" type="text" value="{{ message }}" v-on:keyup="changeContent()">
+                </textarea>
+            </div>
+            <div class="col-md-9" id="terminal">
+            </div>
+            <div class="col-md-9" style="display:none; overflow-y:auto; overflow-x:hidden;" id="config">
+            <validator name="validatorMethod">
+                <form role="form" method="post">
+                    <h3 align="center"> General </h3>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">port</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.port" class="form-control" value="{{ configValue.port }}" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">bind</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.bind" class="form-control" type="text" value="{{ configValue.bind }}" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">unixsocket</label>
+                        <div class="col-md-3">
+                            <input class="form-control" type="text" value="{{ configValue.unixsocket }}" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">unixsocketperm</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.unixsocketperm" class="form-control" type="text" value="{{ configValue.unixsocketperm }}" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">daemonize</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.daemonize" type="checkbox" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">pidfile</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.pidfile" class="form-control" type="text" value="{{ configValue.pidfile }}" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">tcp-backlog</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['tcp-backlog']" class="form-control" type="text" value="{{ configValue['tcp-backlog'] }}" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">tcp-keepalive</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['tcp-keepalive']" class="form-control" type="text" value="{{ configValue['tcp-keepalive'] }}" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">timeout</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.timeout" v-validate:timeout="['numberical']" class="form-control" type="text" value="{{ configValue.timeout }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.timeout.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">databases</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.databases" v-validate:databases="['numberical']" class="form-control" type="text" value="{{ configValue.databases }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.databases.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <h3 align="center"> Logging </h3>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">loglevel</label>
+                        <div class="col-md-3">
+                            <p>
+                                <select ng-model='discussionsSelect' class='form-control' v-model="configValue.loglevel">
+                                    <option value='debug'>debug</option>
+                                    <option value='verbose'>verbose</option>
+                                    <option value='verbose'>verbose</option>
+                                    <option value='notice'>notice</option>
+                                    <option value='warning'>warning</option>
+                                </select>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">logfile</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.logfile" class="form-control" type="text" value="{{ configValue.logfile }}">
+                        </div>
+                    </div>
+                    <h3 align="center"> Snap Shotting </h3>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">dbfilename</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.dbfilename" class="form-control" type="text" value="{{ configValue.dbfilename }}">
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">dir</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.dir" class="form-control" type="text" value="{{ configValue.dir }}">
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">save</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.save" class="form-control" type="text" value="{{ configValue.save }}">
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">stop-writes-on-bgsave-error</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['stop-writes-on-bgsave-error']" type="checkbox" checked>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">rdbcompression</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.rdbcompression" type="checkbox" checked>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">rdbchecksum</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.rdbchecksum" type="checkbox" checked disabled>
+                        </div>
+                    </div>
+                    <h3 align="center"> Replication </h3>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">slaveof</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.slaveof" class="form-control" type="text">
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">masterauth</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.masterauth" class="form-control" type="text">
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">slave-serve-stale-data</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['slave-serve-stale-data']" type="checkbox" checked>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">slave-read-only</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['slave-read-only']" type="checkbox" checked>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">repl-diskless-sync</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['repl-diskless-sync']" type="checkbox">
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">repl-diskless-sync-delay</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['repl-diskless-sync-delay']" v-validate:repldisklesssyncdelay="['numberical']" class="form-control" value="{{ configValue['repl-diskless-sync-delay'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.repldisklesssyncdelay.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">repl-ping-slave-period</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['repl-ping-slave-period']" v-validate:replpingslaveperiod="['numberical']" class="form-control" value="{{ configValue['repl-ping-slave-period'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.replpingslaveperiod.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">repl-timeout</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['repl-timeout']" v-validate:repltimeout="['numberical']" class="form-control" value="{{ configValue['repl-timeout'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.repltimeout.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">repl-disable-tcp-nodelay</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['repl-disable-tcp-nodelay']" type="checkbox">
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">repl-backlog-size</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['repl-backlog-size']" v-validate:replbacklogsize="['numberical']" class="form-control" type="text" value="{{ configValue['repl-backlog-size'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.replbacklogsize.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">repl-backlog-ttl</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['repl-backlog-ttl']" v-validate:replbacklogttl="['numberical']" class="form-control" type="text" value="{{ configValue['repl-backlog-ttl'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.replbacklogttl.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">slave-priority</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['slave-priority']" v-validate:slavepriority="['numberical']" class="form-control" type="text" value="{{ configValue['slave-priority'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.slavepriority.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">min-slaves-to-write</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['min-slaves-to-write']" v-validate:minslavestowrite="['numberical']" class="form-control" type="text" value="{{ configValue['min-slaves-to-write'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.minslavestowrite.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">min-slaves-max-lag</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['min-slaves-max-lag']" v-validate:minslavesmaxlag="['numberical']" class="form-control" type="text" value="{{ configValue['min-slaves-max-lag'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.minslavesmaxlag.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <h3 align="center">Security</h3>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">requirepass</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.requirepass" class="form-control" type="text">
+                        </div>
+                    </div>
+                    <h3 align="center">Limits</h3>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">maxclients</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.maxclients" v-validate:maxclients="['numberical']" class="form-control" type="text" value="{{ configValue.maxclients }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.maxclients.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">maxmemory</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.maxmemory" v-validate:maxmemory="['numberical']" class="form-control" type="text" value="{{ configValue.maxmemory }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.maxmemory.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">maxmemory-policy</label>
+                        <div class="col-md-3">
+                            <select v-model="configValue['maxmemory-policy']" ng-model='discussionsSelect' class='form-control'>
+                                <option value="{{ configValue['maxmemory-policy'] }}">noeviction</option>
+                                <option value="{{ configValue['maxmemory-policy'] }}">volatile-lru</option>
+                                <option value="{{ configValue['maxmemory-policy'] }}">allkeys-lru</option>
+                                <option value="{{ configValue['maxmemory-policy'] }}">volatile-random</option>
+                                <option value="{{ configValue['maxmemory-policy'] }}">allkeys-randoms</option>
+                                <option value="{{ configValue['maxmemory-policy'] }}">volatile-ttl</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">maxmemory-samples</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['maxmemory-samples']" v-validate:maxmemorysamples="['numberical']" class="form-control" type="text" value="{{ configValue['maxmemory-samples'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.maxmemorysamples.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <h3 align="center">Append Only Mode</h3>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">appendonly-samples</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['appendonly-samples']" type="checkbox">
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">appendfsync-samples</label>
+                        <div class="col-md-3">
+                            <select v-model="configValue['appendfsync-samples']" ng-model='discussionsSelect' class='form-control'>
+                                <option value="configValue['appendfsync-samples']">no</option>
+                                <option value="configValue['appendfsync-samples']">everysec</option>
+                                <option value="configValue['appendfsync-samples']">always</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">no-appendfsync-on-rewrite</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.noappendfsynconrewrite" type="checkbox">
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">auto-aof-rewrite-percentage</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['auto-aof-rewrite-percentage']" v-validate:autoaofrewritepercentage="['numberical']" class="form-control" type="text" value="{{ configValue['auto-aof-rewrite-percentage'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.autoaofrewritepercentage.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">auto-aof-rewrite-min-size</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['auto-aof-rewrite-min-size']" v-validate:autoaofrewriteminsize="['numberical']" class="form-control" type="text" value="{{ configValue['auto-aof-rewrite-min-size'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.autoaofrewriteminsize.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">aof-load-truncated</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['aof-load-truncated']" class="form-control" type="text" value="{{ configValue['aof-load-truncated'] }}">
+                        </div>
+                    </div>
+                    <h3 align="center">Lua Scripting</h3>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">lua-time-limit</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['lua-time-limit']" v-validate:luatimelimit="['numberical']" class="form-control" type="text" value="{{ configValue['lua-time-limit'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.luatimelimit.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <h3 align="center">Cluster</h3>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">cluster-node-timeout</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['cluster-node-timeout']" v-validate:clusternodetimeout="['numberical']" class="form-control" type="text" value="{{ configValue['cluster-node-timeout'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.clusternodetimeout.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">cluster-slave-validity-factor</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['cluster-slave-validity-factor']" v-validate:clusterslavevalidityfactor="['numberical']" class="form-control" type="text" value="{{ configValue['cluster-slave-validity-factor'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.clusterslavevalidityfactor.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">cluster-migration-barrier</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['cluster-migration-barrier']" v-validate:clustermigrationbarrier="['numberical']" class="form-control" type="text" value="{{ configValue['cluster-migration-barrier'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.clustermigrationbarrier.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">cluster-require-full-coverage</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['cluster-require-full-coverage']" type="checkbox" checked>
+                        </div>
+                    </div>
+                    <h3 align="center">Slow Log</h3>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">slowlog-log-slower-than</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['slowlog-log-slower-than']" v-validate:slowloglogslowerthan="['numberical']" class="form-control" type="text" value="{{ configValue['slowlog-log-slower-than'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.slowloglogslowerthan.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">slowlog-max-len</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['slowlog-max-len']" v-validate:slowlogmaxlen="['numberical']" class="form-control" type="text" value="{{ configValue['slowlog-max-len'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.slowlogmaxlen.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <h3 align="center">Latency Monitor</h3>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">latency-monitor-threshold</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['latency-monitor-threshold']" v-validate:latencymonitorthreshold="['numberical']" class="form-control" type="text" value="{{ configValue['latency-monitor-threshold'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.latencymonitorthreshold.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <h3 align="center">Event Notification</h3>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">notify-keyspace-events</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['notify-keyspace-events']" class="form-control" type="text" value="{{ configValue['notify-keyspace-events'] }}">
+                        </div>
+                    </div>
+                    <h3 align="center">Advanced Config</h3>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">hash-max-ziplist-entries</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['hash-max-ziplist-entries']" v-validate:hashmaxziplistentries="['numberical']" class="form-control" type="text" value="{{ configValue['hash-max-ziplist-entries'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.hashmaxziplistentries.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">hash-max-ziplist-value</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['hash-max-ziplist-value']" v-validate:hashmaxziplistvalue="['numberical']" class="form-control" type="text" value="{{ configValue['hash-max-ziplist-value'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.hashmaxziplistvalue.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">set-max-intset-entries</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['set-max-intset-entries']" v-validate:setmaxintsetentries="['numberical']" class="form-control" type="text" value="{{ configValue['set-max-intset-entries'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.setmaxintsetentries.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">zset-max-ziplist-entries</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['zset-max-ziplist-entries']" v-validate:zsetmaxziplistentries="['numberical']" class="form-control" type="text" value="{{ configValue['zset-max-ziplist-entries'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.zsetmaxziplistentries.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">zset-max-ziplist-value</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['zset-max-ziplist-value']" v-validate:zsetmaxziplistvalue="['numberical']" class="form-control" type="text" value="{{ configValue['zset-max-ziplist-value'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.zsetmaxziplistvalue.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">hll-sparse-max-bytes</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['hll-sparse-max-bytes']" v-validate:hllsparsemaxbytes="['numberical']" class="form-control" type="text" value="{{ configValue['hll-sparse-max-bytes'] }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.hllsparsemaxbytes.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">activerehashing</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.activerehashing" type="checkbox" checked>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">client-output-buffer-limit</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['client-output-buffer-limit']" class="form-control" type="text" value="{{ configValue['client-output-buffer-limit'] }}">
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">hz</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue.hz" v-validate:hz="['numberical']" class="form-control" type="text" value="{{ configValue.hz }}">
+                        </div>
+                        <div class="col-md-3">
+                            <p class="alert alert-warning" v-if="$validatorMethod.hz.numberical">Please Fill in the Number</p>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <label class="col-md-3 col-form-label" align="right">aof-rewrite-incremental-fsync</label>
+                        <div class="col-md-3">
+                            <input v-model="configValue['aof-rewrite-incremental-fsync']" type="checkbox" checked>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm row">
+                        <div class="col-md-8">
+                            <div class="col-md-1 col-md-offset-4 savetoconfigfile">
+                                <button class="btn btn-primary disabled" type="button" data-toggle="modal" data-target="#saveconf">Save To Config File</button>
+                                <div class="modal fade" id="saveconf" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                  <div class="modal-dialog modal-md">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Save the Changes</h5>
+                                        </div>
+                                    <div class="modal-body">
+                                        <div class="alert alert-warning">
+                                            <strong>Warning! </strong> 
+                                                Are you sure you want to apply the changes and save the changes to the redis.config file?
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                        <button v-cloak @click="saveChange" class="btn btn-primary">Save</button>
+                                    </div>
+                                    </div>
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </validator>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/vue.js"></script>
+    <!-- <script src="/static/js/vue-click-outside.js"></script> -->
+    <script src="/static/js/vue-validator.min.js"></script>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/vendor/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/vendor/Fixed-Header-Table/jquery.fixedheadertable.min.js"></script>
+    <!-- <script src="/static/js/jquery.color.js"></script> -->
+    <script src="/static/js/polyfill.js"></script>
+    <script>keyboardeventKeyPolyfill.polyfill();</script>
+    <!-- <script src="/static/vendor/highlight/highlight.pack.js"></script> -->
+    <!-- <script>hljs.initHighlightingOnLoad();</script> -->
+    <script src="/static/js/jquery.terminal-1.0.6.min.js"></script>
+    <script src="/static/js/customer.js"></script>
+    <!-- <script src="/static/js/jquery-resizable.js"></script> -->
+</body>
+</html>
+
