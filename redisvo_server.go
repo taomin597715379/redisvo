@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/garyburd/redigo/redis"
 	"github.com/gorilla/websocket"
-	_ "github.com/taomin597715379/redisvo/splitecommand"
+	splitecommand "github.com/taomin597715379/redisvo/splitecommand"
 	"github.com/xuyu/goredis"
 	"reflect"
 	"sort"
