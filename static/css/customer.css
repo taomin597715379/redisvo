@@ -222,12 +222,17 @@ div.row {
 }
 
 .user-modal-container .form-register {
-  padding: 75px 25px 25px;
+  padding: 30px 25px 25px;
   display: none;
 }
 
 .user-modal-container .form-register.active {
   display: block;
+}
+
+.user-modal-container .error-message {
+  text-align: center;
+  color: red;
 }
 
 .user-modal-container input {
