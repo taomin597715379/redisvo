@@ -323,7 +323,7 @@ func getServerInfos() string {
 				RedisVer:     version,
 				KeyNumber:    count}
 			c.Close()
-			serverOnline[ipToInteger(serverInfo.Host)] = s
+			serverOnline[ipToInteger(serverInfo.Host)+portToInteger(serverInfo.Port)] = s
 		} else {
 			s = ServerExtInfo{ServerAddr: serverInfo.Host + ":" + serverInfo.Port,
 				UserMemory:   "-",
@@ -331,7 +331,7 @@ func getServerInfos() string {
 				ExeCommand:   "-",
 				RedisVer:     "-",
 				KeyNumber:    "-"}
-			serverNoOnline[ipToInteger(serverInfo.Host)] = s
+			serverNoOnline[ipToInteger(serverInfo.Host)+portToInteger(serverInfo.Port)] = s
 		}
 	}
 	tmpInfo := sortServerInfo(serverOnline)
@@ -447,6 +447,12 @@ func ipToInteger(ip string) int64 {
 		result |= j
 	}
 	return result
+}
+
+// portToInteger port convert to int
+func portToInteger(port string) int64 {
+	j, _ := strconv.ParseInt(port, 10, 0)
+	return j
 }
 
 // sortServerInfo
