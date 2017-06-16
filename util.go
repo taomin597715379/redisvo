@@ -395,7 +395,7 @@ func writeServerToml(name, host, port, auth string) string {
 		conf.ServerInfo = append(conf.ServerInfo, c)
 	}
 	if conf.ServerAddress == `` {
-		conf.ServerAddress = `127.0.0.1:7000`
+		conf.ServerAddress = `0.0.0.0:7000`
 	}
 	if conf.AuthInfo == (Auth{}) {
 		conf.AuthInfo = Auth{Admin: "", Password: "", Enable: 0}

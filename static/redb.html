@@ -144,16 +144,19 @@
                                       </div>
                                     </div>
                                   </div>
-                                </div>                     
+                                </div>
+                                <span class="pull-right" style="padding-right: 8px;" @click="refresh()">
+                                    <i id="refresh" class="fa fa-refresh" aria-hidden="true"></i>
+                                </span>       
                             </th>
                         </tr>
                     </thead>
                     <tbody>
                        <tr v-if="keys.length" id="retriever-task-{{ index }}" v-for="(index, key) in keys" @click="hideContextMenu(index, $event)"
                            @contextmenu.prevent="showContextMenu(index,key,$event)">
-                            <td v-on:click="getKeysByTypeName(key.type, key.name)"> <span class="{{ key.type }}" v-text="key.type"> </span> </td>
+                            <td v-on:click="getKeysByTypeName(index, key.type, key.name)"> <span class="{{ key.type }}" v-text="key.type"> </span> </td>
                             <td v-on:click="getMoreTypeName()" v-if='key.name == "More"'> <a href="#" v-text="key.name"> </a> </td>
-                            <td v-click-outside="" v-on:keyup="resizeInput" v-on:keyup.enter="modifySubmit(key.type)" v-on:click="getKeysByTypeName(key.type, key.name)" v-else v-html="key.name"> </td>
+                            <td v-click-outside="" v-on:keyup="resizeInput" v-on:keyup.enter="modifySubmit(key.type)" v-on:click="getKeysByTypeName(index, key.type, key.name)" v-else v-html="key.name"> </td>
                             <context-menu></context-menu>
                         </tr>
                     </tbody>
@@ -276,7 +279,7 @@
                             <td v-show="zset_index_show" v-text="key.index"> </td>
                             <td v-text="key.score"> </td>
                             <td v-cloak v-on:click="getMoreFieldName()" v-if='key.name == "More"'> <a href="#" v-text="key.name"> </a> </td>
-                            <td v-cloak v-on:click="getContentByKeys(key.name, key.score)" v-else v-text="key.name"> </td>
+                            <td v-cloak v-on:click="getContentByKeys(index, key.name, key.score)" v-else v-text="key.name"> </td>
                         </tr>
                     </tbody>
                 </table>

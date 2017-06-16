@@ -60,7 +60,7 @@ $(document).ready(function() {
 				typeName.hideContextMenu();
 			},
 			refresh: function() {
-				typeName.getKeysByTypeName(this.type, this.name);
+				typeName.getKeysByTypeName(this.index, this.type, this.name);
 				typeName.hideContextMenu();
 			},
 			cancel: function() {
@@ -225,6 +225,8 @@ $(document).ready(function() {
     		contextMenuHeight: null,
     		keyName: null,
     		index: null,
+    		need_refresh: 0,
+    		timer: null,
 	  	},
 	  	methods: {
 	  		notify: function(index, type, name) {
@@ -352,7 +354,8 @@ $(document).ready(function() {
 					searValue.searchTypeNameShowMore()
 				}
 		    },
-		    getKeysByTypeName: function(type, name) {
+		    getKeysByTypeName: function(index, type, name) {
+		    	this.addShadow(index);
 		    	var activeIcon = $('#nav_show .active a').text().trim();
 		    	if(activeIcon == "Content") {
 			    	if(type == "string") {
@@ -388,6 +391,39 @@ $(document).ready(function() {
 							console.log('error ajax ... ')
 						}
 					})
+		    	}
+		    },
+		    addShadow: function(index) {
+		    	$("#type-name tbody tr td:nth-child(2)").each(function(idx) {
+		    		if($(this).attr("style") != undefined) {
+		    			var val = $(this).attr("style").indexOf("background-color");
+				        if(val != -1) {
+				        	$("#type-name tbody tr td:nth-child(2)").eq(idx).css("background-color", "");
+				        }
+		    		}
+				})
+				$("#keys-name tbody tr").each(function(idx) {
+		    		if($(this).attr("style") != undefined) {
+		    			var val = $(this).attr("style").indexOf("background-color");
+				        if(val != -1) {
+				        	$("#type-name tbody tr").eq(idx).css("background-color", "");
+				        }
+		    		}
+				})
+		    	$('#type-name tbody tr td:nth-child(2)').eq(index).css("background-color", "#FEF3B7");
+		    },
+		    refresh: function() {
+		    	console.log(this.need_refresh);
+		    	if(this.need_refresh == 1) {
+		    		$('#refresh').css("color", "");
+		    		this.need_refresh = 0;
+		    		clearInterval(this.timer);
+		    	} else{
+		    		this.need_refresh = 1;
+					$('#refresh').css("color", "#5cb85c");
+		    		this.timer = setInterval(function() {
+					    searValue.searchTypeName();
+					}, 5000);
 		    	}
 		    }
 		}
@@ -488,7 +524,8 @@ $(document).ready(function() {
 					})
 		    	}
 		    },
-		    getContentByKeys:function(key_name, index) {
+		    getContentByKeys:function(index, key_name, index) {
+		    	this.addShadow(index);
 		    	var server_info = getUrlParameter('server')
 		    	var db = $('a.selected').children("span").text();
 		    	var host = $(location).attr('host');
@@ -520,6 +557,17 @@ $(document).ready(function() {
 						console.log('error ajax ... ')
 					}
 	    		})
+			},
+			addShadow: function(index) {
+				$("#keys-name tbody tr").each(function(idx) {
+		    		if($(this).attr("style") != undefined) {
+		    			var val = $(this).attr("style").indexOf("background-color");
+				        if(val != -1) {
+				        	$("#keys-name  tbody tr").eq(idx).css("background-color", "");
+				        }
+		    		}
+				})
+		    	$('#keys-name tbody tr').eq(index).css("background-color", "#FEF3B7");
 			}
 		}
 	});
