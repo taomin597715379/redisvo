@@ -87,7 +87,6 @@ $(document).ready(function() {
 		    handles: 'e',
 		    distance: 0,
 		    minWidth: 250,
-		    maxWidth: 450,
 		    resize: function(e, ui) {
                 $('#rightbar').css("width", 1170 - $('#leftbar').width() - $('#midbar').width());
             }
@@ -99,7 +98,6 @@ $(document).ready(function() {
 		    handles: 'e',
 		    distance: 0,
 		    minWidth: 250,
-		    maxWidth: 450,
 		    resize: function(e, ui) {
                 $('#rightbar').css("width", 1170 - $('#leftbar').width() - $('#midbar').width());
             }
@@ -355,6 +353,7 @@ $(document).ready(function() {
 				}
 		    },
 		    getKeysByTypeName: function(index, type, name) {
+		    	this.index = index;
 		    	this.addShadow(index);
 		    	var activeIcon = $('#nav_show .active a').text().trim();
 		    	if(activeIcon == "Content") {
@@ -413,7 +412,6 @@ $(document).ready(function() {
 		    	$('#type-name tbody tr td:nth-child(2)').eq(index).css("background-color", "#FEF3B7");
 		    },
 		    refresh: function() {
-		    	console.log(this.need_refresh);
 		    	if(this.need_refresh == 1) {
 		    		$('#refresh').css("color", "");
 		    		this.need_refresh = 0;
@@ -421,9 +419,19 @@ $(document).ready(function() {
 		    	} else{
 		    		this.need_refresh = 1;
 					$('#refresh').css("color", "#5cb85c");
-		    		this.timer = setInterval(function() {
-					    searValue.searchTypeName();
-					}, 5000);
+					if(this.index == undefined) {
+						this.timer = setInterval(function() {
+						    searValue.searchTypeName();
+						}, 5000);
+					} else {
+						var name = this.keys[this.index].name;
+						searValue.search_value = name;
+						searValue.searchTypeName();
+						this.timer = setInterval(function() {
+			    			searValue.search_value = name;
+						    searValue.searchTypeName();
+						}, 5000);
+					}
 		    	}
 		    }
 		}
