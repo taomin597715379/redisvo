@@ -5,12 +5,14 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 )
 
 func main() {
 	//logo
 	fmt.Printf("%s \n", LOGO)
+	dir, _ = filepath.Abs(filepath.Dir(os.Args[0]))
 	// defer
 	defer func() {
 		if err := recover(); err != nil {

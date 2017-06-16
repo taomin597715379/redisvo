@@ -15,6 +15,7 @@ import (
 	"time"
 )
 
+var dir string
 var serverPoolMap = make(map[string]*redis.Pool, 0)
 var goRedisMap = make(map[string]*goredis.Redis, 0)
 var MonitorMessage = make(chan MonitorInfo, 0)
@@ -27,7 +28,7 @@ var cacheRedisConf = make(map[string]map[string]string, 0)
 
 const (
 	MAXFIELDNUMBER = 100000
-	SELF_CONF_FILE = `.` + string(os.PathSeparator) + `redisvo.toml`
+	SELF_CONF_FILE = string(os.PathSeparator) + `redisvo.toml`
 )
 
 func (c Int64Slice) Len() int {
@@ -308,7 +309,7 @@ func getServerInfos() string {
 	var serverOnline = make(map[int64]ServerExtInfo, 0)
 	var serverNoOnline = make(map[int64]ServerExtInfo, 0)
 	var s ServerExtInfo
-	_, err := toml.DecodeFile(SELF_CONF_FILE, &conf)
+	_, err := toml.DecodeFile(dir+SELF_CONF_FILE, &conf)
 	if err != nil {
 		return ""
 	}
@@ -346,7 +347,7 @@ func getServerInfos() string {
 func removeServerInfo(name string) string {
 	var conf ConfigInfo
 	var sBuffer bytes.Buffer
-	_, err := toml.DecodeFile(SELF_CONF_FILE, &conf)
+	_, err := toml.DecodeFile(dir+SELF_CONF_FILE, &conf)
 	if err != nil {
 		return "Error"
 	}
@@ -361,7 +362,7 @@ func removeServerInfo(name string) string {
 		fmt.Println(err)
 		return "Error"
 	}
-	err = ioutil.WriteFile(SELF_CONF_FILE, []byte(sBuffer.String()), 0644)
+	err = ioutil.WriteFile(dir+SELF_CONF_FILE, []byte(sBuffer.String()), 0644)
 	if err != nil {
 		fmt.Println(err)
 		return "Error"
@@ -373,14 +374,14 @@ func writeServerToml(name, host, port, auth string) string {
 	var conf ConfigInfo
 	var flag int = 0
 	var sBuffer bytes.Buffer
-	if _, err := os.Stat(SELF_CONF_FILE); os.IsNotExist(err) {
-		f, err := os.Create(SELF_CONF_FILE)
+	if _, err := os.Stat(dir + SELF_CONF_FILE); os.IsNotExist(err) {
+		f, err := os.Create(dir + SELF_CONF_FILE)
 		if err != nil {
 			return `false`
 		}
 		defer f.Close()
 	}
-	_, err := toml.DecodeFile(SELF_CONF_FILE, &conf)
+	_, err := toml.DecodeFile(dir+SELF_CONF_FILE, &conf)
 	if err != nil {
 		return `false`
 	}
@@ -405,7 +406,7 @@ func writeServerToml(name, host, port, auth string) string {
 		fmt.Println(err)
 		return `false`
 	}
-	err = ioutil.WriteFile(SELF_CONF_FILE, []byte(sBuffer.String()), 0644)
+	err = ioutil.WriteFile(dir+SELF_CONF_FILE, []byte(sBuffer.String()), 0644)
 	if err != nil {
 		fmt.Println(err)
 		return `false`
@@ -472,10 +473,10 @@ func sortServerInfo(info map[int64]ServerExtInfo) []ServerExtInfo {
 // get serverAddress from config
 func getServerAddress() string {
 	var conf ConfigInfo
-	if _, err := os.Stat(SELF_CONF_FILE); os.IsNotExist(err) {
+	if _, err := os.Stat(dir + SELF_CONF_FILE); os.IsNotExist(err) {
 		return `127.0.0.1:7000`
 	}
-	_, err := toml.DecodeFile(SELF_CONF_FILE, &conf)
+	_, err := toml.DecodeFile(dir+SELF_CONF_FILE, &conf)
 	if err != nil {
 		return `127.0.0.1:7000`
 	}
@@ -485,10 +486,10 @@ func getServerAddress() string {
 // get serverAddress from config
 func loginCheck(admin, password string) string {
 	var conf ConfigInfo
-	if _, err := os.Stat(SELF_CONF_FILE); os.IsNotExist(err) {
+	if _, err := os.Stat(dir + SELF_CONF_FILE); os.IsNotExist(err) {
 		return `false`
 	}
-	_, err := toml.DecodeFile(SELF_CONF_FILE, &conf)
+	_, err := toml.DecodeFile(dir+SELF_CONF_FILE, &conf)
 	if err != nil {
 		return `false`
 	}
@@ -502,10 +503,10 @@ func loginCheck(admin, password string) string {
 // get validate info from config file
 func isValidate() bool {
 	var conf ConfigInfo
-	if _, err := os.Stat(SELF_CONF_FILE); os.IsNotExist(err) {
+	if _, err := os.Stat(dir + SELF_CONF_FILE); os.IsNotExist(err) {
 		return false
 	}
-	_, err := toml.DecodeFile(SELF_CONF_FILE, &conf)
+	_, err := toml.DecodeFile(dir+SELF_CONF_FILE, &conf)
 	if err != nil {
 		return false
 	}
