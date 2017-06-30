@@ -15,37 +15,72 @@ import (
 	"time"
 )
 
-var dir string
+// serverPoolMap storage redis connnect
 var serverPoolMap = make(map[string]*redis.Pool, 0)
+
+// goRedisMap storage redis connnect
 var goRedisMap = make(map[string]*goredis.Redis, 0)
+
+// MonitorMessage the data output by the monitor command is pushed to
+// the front end via websockets
 var MonitorMessage = make(chan MonitorInfo, 0)
+
+// serverMessage
 var serverMessage = make(chan string, 0)
+
+// ctrlcMessage the font end active close websockets connect via ctr+c or ctrl+z
 var ctrlcMessage = make(chan string, 0)
+
+// receiveOver when the font end active close websockets connect via ctr+c or ctrl+z
+// send message to realMonitorTime of goroutine will exit actively
 var receiveOver = make(chan string, 0)
+
+// clientActiveClose when the font end active close websockets connect via close browser
+// send message to realMonitorTime of goroutine will exit actively
 var clientActiveClose = make(chan bool, 0)
+
+// redisConfMap
 var redisConfMap = make(map[string]string, 0)
+
+// cacheRedisConf
 var cacheRedisConf = make(map[string]map[string]string, 0)
 
+// dir
+var dir string
+
+// MAXFIELDNUMBER only show the max of key and
+// SELF_CONF_FILE is relative path
 const (
 	MAXFIELDNUMBER = 100000
 	SELF_CONF_FILE = string(os.PathSeparator) + `redisvo.toml`
 )
 
+// Len interface int64Slice struct implement
 func (c Int64Slice) Len() int {
 	return len(c)
 }
+
+// Swap interface int64Slice struct implement
 func (c Int64Slice) Swap(i, j int) {
 	c[i], c[j] = c[j], c[i]
 }
+
+// Less interface int64Slice struct implement
 func (c Int64Slice) Less(i, j int) bool {
 	return c[i] < c[j]
 }
+
+// Len interface typeNames struct implement
 func (u TypeNames) Len() int {
 	return len(u)
 }
+
+// Less interface typeNames struct implement
 func (u TypeNames) Less(i, j int) bool {
 	return u[i].Name < u[j].Name
 }
+
+// Swap interface typeNames struct implement
 func (u TypeNames) Swap(i, j int) {
 	u[i], u[j] = u[j], u[i]
 }
@@ -266,40 +301,6 @@ func getKeysByTypeName(rdsConn redis.Conn, typ, name string) (keyNames []KeyName
 	return
 }
 
-// getServers from toml file server list according parameter to get status
-// func getServers(isIncludeStatus string) string {
-// 	var conf ConfigInfo
-// 	var includeStatus []ServerStatus
-// 	var s ServerStatus
-// 	var buf []byte
-// 	_, err := toml.DecodeFile(SELF_CONF_FILE, &conf)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		return ""
-// 	}
-// 	if isIncludeStatus == `exclude` {
-// 		for _, serverInfo := range conf.ServerInfo {
-// 			s = ServerStatus{ServerAddr: serverInfo.Host + ":" + serverInfo.Port, Status: 1}
-// 			includeStatus = append(includeStatus, s)
-// 		}
-// 		buf, _ = json.Marshal(includeStatus)
-// 	}
-// 	if isIncludeStatus == `include` {
-// 		timeout := time.Duration(1) * time.Second
-// 		for _, serverInfo := range conf.ServerInfo {
-// 			if c, err := redis.DialTimeout("tcp", serverInfo.Host+":"+serverInfo.Port, timeout, timeout, timeout); err == nil {
-// 				s = ServerStatus{ServerAddr: serverInfo.Host + ":" + serverInfo.Port, Status: 1}
-// 				c.Close()
-// 			} else {
-// 				s = ServerStatus{ServerAddr: serverInfo.Host + ":" + serverInfo.Port, Status: 0}
-// 			}
-// 			includeStatus = append(includeStatus, s)
-// 		}
-// 		buf, _ = json.Marshal(includeStatus)
-// 	}
-// 	return string(buf)
-// }
-
 // getServerInfos get server info for example redis-version, clients and so on
 // others server info will be sort by ip
 func getServerInfos() string {
@@ -370,6 +371,7 @@ func removeServerInfo(name string) string {
 	return "OK"
 }
 
+// writeServerToml add redis-server info and write into config file
 func writeServerToml(name, host, port, auth string) string {
 	var conf ConfigInfo
 	var flag int = 0
@@ -414,6 +416,7 @@ func writeServerToml(name, host, port, auth string) string {
 	return `OK`
 }
 
+// getInfoByField get redis-server some statistic info by command of info
 func getInfoByField(c redis.Conn) (string, string, string, string, string) {
 	var count int64
 	var field = []string{"server", "memory", "clients", "stats"}
@@ -483,7 +486,7 @@ func getServerAddress() string {
 	return conf.ServerAddress
 }
 
-// get serverAddress from config
+// loginCheck get serverAddress from config
 func loginCheck(admin, password string) string {
 	var conf ConfigInfo
 	if _, err := os.Stat(dir + SELF_CONF_FILE); os.IsNotExist(err) {
@@ -500,7 +503,7 @@ func loginCheck(admin, password string) string {
 	return `false`
 }
 
-// get validate info from config file
+// isValidate get validate info from config file
 func isValidate() bool {
 	var conf ConfigInfo
 	if _, err := os.Stat(dir + SELF_CONF_FILE); os.IsNotExist(err) {

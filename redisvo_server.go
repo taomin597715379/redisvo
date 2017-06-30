@@ -401,6 +401,7 @@ func getContentByTypeNameAndKey(server, db, style, name, key_name string) string
 	return string(buf)
 }
 
+// getInfo by command of info
 func getInfo(c redis.Conn, info_key, dbno string) int64 {
 	var cnt int64 = 0
 	value, err := redis.String(c.Do("info", info_key))
@@ -416,6 +417,7 @@ func getInfo(c redis.Conn, info_key, dbno string) int64 {
 	return cnt
 }
 
+// moreTypeName supports show more of key
 func moreTypeName(sumShowNumber, more int64, redisReply []string, rdsConn redis.Conn) (typeNames TypeNames) {
 	var i, moreFlag, natureShowNumber int64
 	if sumShowNumber <= SHOWMAXROW {
@@ -448,6 +450,7 @@ func moreTypeName(sumShowNumber, more int64, redisReply []string, rdsConn redis.
 	return typeNames
 }
 
+// moreTypeName supports show more of field
 func moreFieldName(sumShowNumber, more int64, keyNames []KeyName) []KeyName {
 	var moreFlag, natureShowNumber int64
 	if sumShowNumber <= SHOWMAXROW {
