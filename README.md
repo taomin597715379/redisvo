@@ -19,6 +19,11 @@ redisvo is a web-based Redis server written in Go and works on Windows, Linux an
 - Web-cli interactive mode
 - Change redis-config file easily
 
+## Todo Lists
+
+- Cluster management
+- Redis-server Performance real-time monitoring
+
 ## Installation
 
 [Precompiled binaries](https://github.com/taomin597715379/redisvo/releases) for supported 
