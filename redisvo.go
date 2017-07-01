@@ -16,9 +16,9 @@ func main() {
 	// defer
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("run time panic: %v", err)
+			fmt.Printf("run time panic: %v", err)
 		}
-		fmt.Println("redisvo Exited ...\n")
+		fmt.Printf("redisvo Exited ...\n")
 	}()
 	// route
 	http.HandleFunc("/login", login)

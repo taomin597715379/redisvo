@@ -137,25 +137,25 @@ func saveContent(rdsConn redis.Conn, style, name, field, content string, idx int
 	switch style {
 	case `string`:
 		_, err = redis.String(rdsConn.Do("set", name, content))
-		return err
+		break
 	case `hash`:
 		_, err = redis.String(rdsConn.Do("hset", name, field, content))
-		return err
+		break
 	case `list`:
 		_, err = redis.String(rdsConn.Do("lset", name, idx, content))
-		return err
+		break
 	case `set`:
 		_, err = redis.String(rdsConn.Do("srem", name, field))
 		_, err = redis.String(rdsConn.Do("sadd", name, content))
-		return err
+		break
 	case `zset`:
 		_, err = redis.String(rdsConn.Do("zrem", name, field))
 		_, err = redis.String(rdsConn.Do("zadd", name, idx, content))
-		return err
+		break
 	default:
-		return nil
+		break
 	}
-	return nil
+	return err
 }
 
 // setKeyOrFieldByStyle
@@ -164,13 +164,13 @@ func setKeyOrFieldByStyle(rdsConn redis.Conn, style, name, field string) (conten
 	switch style {
 	case `string`:
 		content, err = redis.String(rdsConn.Do("set", name, field))
-		return content, err
+		break
 	case `hash`:
 		if field == `` {
 			field = `New Key`
 		}
 		content, err = redis.String(rdsConn.Do("hset", name, field, "New Member"))
-		return content, err
+		break
 	case `list`:
 		if field == `` {
 			field = `New Item`
@@ -188,7 +188,7 @@ func setKeyOrFieldByStyle(rdsConn redis.Conn, style, name, field string) (conten
 		if splitField[0] == `tail` {
 			content, err = redis.String(rdsConn.Do("rpush", name, value))
 		}
-		return content, err
+		break
 	case `set`:
 		if field == `` {
 			field = `New Member`
@@ -208,11 +208,11 @@ func setKeyOrFieldByStyle(rdsConn redis.Conn, style, name, field string) (conten
 		}
 		score, _ := strconv.ParseInt(splitField[0], 10, 0)
 		content, err = redis.String(rdsConn.Do("zadd", name, score, value))
-		return content, err
+		break
 	default:
-		return ``, nil
+		break
 	}
-	return ``, nil
+	return content, err
 }
 
 // getContentByTypeNameAnd according type, name, key_name to get content
@@ -220,23 +220,23 @@ func getContentByTypeNameAnd(rdsConn redis.Conn, typ, name, key_name string) (co
 	switch typ {
 	case `string`:
 		content, _ = redis.String(rdsConn.Do("get", name))
-		return content
+		break
 	case `hash`:
 		content, _ = redis.String(rdsConn.Do("hget", name, key_name))
-		return content
+		break
 	case `list`:
 		content = key_name
-		return content
+		break
 	case `set`:
 		content = key_name
-		return content
+		break
 	case `zset`:
 		content = key_name
-		return content
+		break
 	default:
 		break
 	}
-	return
+	return content
 }
 
 // getKeysByTypeName according type, name to key and content
@@ -244,9 +244,8 @@ func getKeysByTypeName(rdsConn redis.Conn, typ, name string) (keyNames []KeyName
 	var i, l int
 	switch typ {
 	case `string`:
-		keyNames = []KeyName{}
 		content, _ = redis.String(rdsConn.Do("get", name))
-		return keyNames, content
+		break
 	case `hash`:
 		fields, _ := redis.Strings(rdsConn.Do("hkeys", name))
 		if len(fields) > 0 {
@@ -260,7 +259,7 @@ func getKeysByTypeName(rdsConn redis.Conn, typ, name string) (keyNames []KeyName
 		if len(keyNames) > 0 {
 			content, _ = redis.String(rdsConn.Do("hget", name, keyNames[0].Name))
 		}
-		return keyNames, content
+		break
 	case `list`:
 		fields, _ := redis.Strings(rdsConn.Do("lrange", name, 0, -1))
 		if len(fields) > 0 {
@@ -271,7 +270,7 @@ func getKeysByTypeName(rdsConn redis.Conn, typ, name string) (keyNames []KeyName
 		if len(keyNames) > 0 {
 			content = keyNames[0].Name
 		}
-		return keyNames, content
+		break
 	case `set`:
 		fields, _ := redis.Strings(rdsConn.Do("smembers", name))
 		if len(fields) > 0 {
@@ -282,7 +281,7 @@ func getKeysByTypeName(rdsConn redis.Conn, typ, name string) (keyNames []KeyName
 		if len(keyNames) > 0 {
 			content = keyNames[0].Name
 		}
-		return keyNames, content
+		break
 	case `zset`:
 		fields, _ := redis.Strings(rdsConn.Do("zrange", name, 0, -1, "WITHSCORES"))
 		if len(fields) > 0 {
@@ -295,10 +294,11 @@ func getKeysByTypeName(rdsConn redis.Conn, typ, name string) (keyNames []KeyName
 		if len(keyNames) > 0 {
 			content = keyNames[0].Name
 		}
+		break
 	default:
 		break
 	}
-	return
+	return keyNames, content
 }
 
 // getServerInfos get server info for example redis-version, clients and so on
