@@ -120,7 +120,7 @@ type RedisTypeName struct {
 	Contents string `json:"content"`
 }
 
-// RedisTypeName json style response of http request
+// RedisKeyName json style response of http request
 type RedisKeyName struct {
 	KeysNamesWithType struct {
 		KeysNames    []KeyName `json:"keysname"`
@@ -129,27 +129,27 @@ type RedisKeyName struct {
 	Contents string `json:"content"`
 }
 
-// TypeName
+// TypeName describe type and name of key
 type TypeName struct {
 	Type string `json:"type"`
 	Name string `json:"name"`
 }
 
-// KeyName
+// KeyName describe information of field
 type KeyName struct {
 	Name  string `json:"name"`
 	Index int    `json:"index"`
 	Score int    `json:"score"`
 }
 
-// MonitorInfo
+// MonitorInfo describe monitor push style of message
 type MonitorInfo struct {
 	Message string `json:"message"`
 	Err     error  `json:"err"`
 }
 
-// Int64Slice
+// Int64Slice descrbie []int64
 type Int64Slice []int64
 
-// TypeNames
+// TypeNames descrbie []TypeName
 type TypeNames []TypeName
