@@ -328,7 +328,7 @@ func getTypeNameAndKeyBySearchKey(server, db, search_key, showmore string) strin
 		fmt.Println(err)
 		return `{"typename":[],"keysnameswithtype":{"keysname":[]},"content":""}`
 	}
-	redisReply, err := redis.Strings(rdsConn.Do("keys", search_key+"*"))
+	redisReply, err := redis.Strings(rdsConn.Do("keys", "*"+search_key+"*"))
 	if err != nil {
 		fmt.Println(err)
 		return `{"typename":[],"keysnameswithtype":{"keysname":[]},"content":""}`
