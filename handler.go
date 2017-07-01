@@ -97,7 +97,7 @@ func getServerKeyNameHtml(w http.ResponseWriter, r *http.Request) {
 	w.Write(html)
 }
 
-// getInfoByServerAndDb connect to redis-server accroding db serial and server address
+// getInfoByServerAndDb connect to redis-server according db serial and server address
 func getInfoByServerAndDb(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Server", "Go Server")

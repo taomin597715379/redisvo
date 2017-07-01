@@ -94,7 +94,6 @@ func AnalyzeCommand(commandLine string) ([]string, error) {
 			}
 		}
 		ret = append(ret, current)
-		current = ``
 	}
 	return ret, nil
 }
