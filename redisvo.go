@@ -10,17 +10,14 @@ import (
 )
 
 func main() {
-	//logo
 	fmt.Printf("%s \n", LOGO)
 	dir, _ = filepath.Abs(filepath.Dir(os.Args[0]))
-	// defer
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Printf("run time panic: %v", err)
 		}
 		fmt.Printf("redisvo Exited ...\n")
 	}()
-	// route
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/config", getConfigInfo)
 	http.HandleFunc("/monitor", redisMonitorRealTime)
@@ -38,7 +35,6 @@ func main() {
 	http.HandleFunc("/changeContent", saveChangeContent)
 	http.HandleFunc("/terminal", execInstruction)
 	http.HandleFunc("/", getMainInterface)
-	// server
 	go func(serverAddress string) {
 		if err := http.ListenAndServe(serverAddress, nil); err != nil {
 			panic("Binding service ip and port error, please check whether the port is occupied and then restart ... ")

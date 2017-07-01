@@ -216,22 +216,22 @@ func setKeyOrFieldByStyle(rdsConn redis.Conn, style, name, field string) (conten
 }
 
 // getContentByTypeNameAnd according type, name, key_name to get content
-func getContentByTypeNameAnd(rdsConn redis.Conn, typ, name, key_name string) (content string) {
+func getContentByTypeNameAnd(rdsConn redis.Conn, typ, name, keyName string) (content string) {
 	switch typ {
 	case `string`:
 		content, _ = redis.String(rdsConn.Do("get", name))
 		break
 	case `hash`:
-		content, _ = redis.String(rdsConn.Do("hget", name, key_name))
+		content, _ = redis.String(rdsConn.Do("hget", name, keyName))
 		break
 	case `list`:
-		content = key_name
+		content = keyName
 		break
 	case `set`:
-		content = key_name
+		content = keyName
 		break
 	case `zset`:
-		content = key_name
+		content = keyName
 		break
 	default:
 		break
@@ -374,7 +374,7 @@ func removeServerInfo(name string) string {
 // writeServerToml add redis-server info and write into config file
 func writeServerToml(name, host, port, auth string) string {
 	var conf ConfigInfo
-	var flag int = 0
+	var flag int
 	var sBuffer bytes.Buffer
 	if _, err := os.Stat(dir + SELF_CONF_FILE); os.IsNotExist(err) {
 		f, err := os.Create(dir + SELF_CONF_FILE)
@@ -427,9 +427,9 @@ func getInfoByField(c redis.Conn) (string, string, string, string, string) {
 		if err != nil {
 			return "-", "-", "-", "-", "-"
 		}
-		for _, sub_string := range strings.Split(value, "\n") {
-			if strings.Contains(sub_string, fieldMap[v]) {
-				fieldRet[v] = strings.Split(sub_string, ":")[1]
+		for _, subString := range strings.Split(value, "\n") {
+			if strings.Contains(subString, fieldMap[v]) {
+				fieldRet[v] = strings.Split(subString, ":")[1]
 				break
 			}
 		}
@@ -443,7 +443,7 @@ func getInfoByField(c redis.Conn) (string, string, string, string, string) {
 
 // ipToInteger ip convert to int
 func ipToInteger(ip string) int64 {
-	var result int64 = 0
+	var result int64
 	var ipArr []string = strings.Split(ip, ".")
 	for k, v := range ipArr {
 		j, _ := strconv.ParseInt(v, 10, 0)
@@ -463,7 +463,7 @@ func portToInteger(port string) int64 {
 func sortServerInfo(info map[int64]ServerExtInfo) []ServerExtInfo {
 	var ipInt64 Int64Slice
 	var serverInfos []ServerExtInfo
-	for k, _ := range info {
+	for k := range info {
 		ipInt64 = append(ipInt64, k)
 	}
 	sort.Sort(ipInt64)

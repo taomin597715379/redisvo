@@ -1,5 +1,6 @@
 package main
 
+// LOGO
 var LOGO string = `                              
          /\       /\       /\       /\       /\       /\       /
   \     /__\     / _\        \_    /  __    /  \  _  /  \     /  

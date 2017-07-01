@@ -9,8 +9,10 @@ import (
 	"strings"
 )
 
+// SHOWMAXROW the number of keys in one response
 const SHOWMAXROW = 40
 
+// upgrader http upgrade websocket
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -62,10 +64,6 @@ func getServerList(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	isIncludeStatus := r.URL.Query().Get(`status`)
 	switch isIncludeStatus {
-	// case `include`:
-	// 	io.WriteString(w, getServers(isIncludeStatus))
-	// case `exclude`:
-	// 	io.WriteString(w, getServers(isIncludeStatus))
 	case `serverinfo`:
 		io.WriteString(w, getServerInfos())
 	case `remove`:
@@ -104,16 +102,16 @@ func getInfoByServerAndDb(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Server", "Go Server")
 	server := r.URL.Query().Get(`server`)
-	db_serial := r.URL.Query().Get(`db`)
+	dbSerial := r.URL.Query().Get(`db`)
 	var showmore = r.URL.Query().Get(`showmore`)
 	if showmore == `` {
 		showmore = `0`
 	}
-	if server == `` || db_serial == `` {
+	if server == `` || dbSerial == `` {
 		io.WriteString(w, `{}`)
 		return
 	}
-	io.WriteString(w, getTypeNameAndKeyByDb(server, db_serial, showmore))
+	io.WriteString(w, getTypeNameAndKeyByDb(server, dbSerial, showmore))
 }
 
 // getInfoBySearchKey search redis key according search key
@@ -121,17 +119,17 @@ func getInfoBySearchKey(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Server", "Go Server")
 	server := r.URL.Query().Get(`server`)
-	db_serial := r.URL.Query().Get(`db`)
-	search_key := r.URL.Query().Get(`search`)
+	dbSerial := r.URL.Query().Get(`db`)
+	searchKey := r.URL.Query().Get(`search`)
 	var showmore = r.URL.Query().Get(`showmore`)
 	if showmore == `` {
 		showmore = `0`
 	}
-	if server == `` || db_serial == `` {
+	if server == `` || dbSerial == `` {
 		io.WriteString(w, `{}`)
 		return
 	}
-	io.WriteString(w, getTypeNameAndKeyBySearchKey(server, db_serial, search_key, showmore))
+	io.WriteString(w, getTypeNameAndKeyBySearchKey(server, dbSerial, searchKey, showmore))
 }
 
 // getInfoByTypeNameorKey get field value from type and name
@@ -139,23 +137,23 @@ func getInfoByTypeNameorKey(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Server", "Go Server")
 	server := r.URL.Query().Get(`server`)
-	db_serial := r.URL.Query().Get(`db`)
+	dbSerial := r.URL.Query().Get(`db`)
 	style := r.URL.Query().Get(`style`)
 	name := r.URL.Query().Get(`name`)
-	key_name := r.URL.Query().Get(`key_name`)
+	keyName := r.URL.Query().Get(`key_name`)
 	var showmore = r.URL.Query().Get(`showmore`)
-	if server == `` || db_serial == `` {
+	if server == `` || dbSerial == `` {
 		io.WriteString(w, `{}`)
 		return
 	}
 	if showmore == `` {
 		showmore = `0`
 	}
-	if key_name == `` {
-		io.WriteString(w, getKeyContentByTypeNameorKey(server, db_serial, style, name, showmore))
+	if keyName == `` {
+		io.WriteString(w, getKeyContentByTypeNameorKey(server, dbSerial, style, name, showmore))
 		return
 	}
-	io.WriteString(w, getContentByTypeNameAndKey(server, db_serial, style, name, key_name))
+	io.WriteString(w, getContentByTypeNameAndKey(server, dbSerial, style, name, keyName))
 }
 
 // addKeysByTypeAndName add key by type and name
@@ -163,15 +161,15 @@ func addFieldsByTypeAndName(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Server", "Go Server")
 	server := r.URL.Query().Get(`server`)
-	db_serial := r.URL.Query().Get(`db`)
+	dbSerial := r.URL.Query().Get(`db`)
 	style := r.URL.Query().Get(`style`)
 	name := r.URL.Query().Get(`name`)
 	field := r.URL.Query().Get(`field`)
-	if server == `` || db_serial == `` {
+	if server == `` || dbSerial == `` {
 		io.WriteString(w, `{}`)
 		return
 	}
-	io.WriteString(w, addKeyOrField(server, db_serial, style, name, field))
+	io.WriteString(w, addKeyOrField(server, dbSerial, style, name, field))
 }
 
 // deleteTypeName key by type and name
@@ -179,15 +177,15 @@ func deleteTypeName(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Server", "Go Server")
 	server := r.URL.Query().Get(`server`)
-	db_serial := r.URL.Query().Get(`db`)
+	dbSerial := r.URL.Query().Get(`db`)
 	style := r.URL.Query().Get(`style`)
 	name := r.URL.Query().Get(`name`)
-	if server == `` || db_serial == `` {
+	if server == `` || dbSerial == `` {
 		io.WriteString(w, `{}`)
 		return
 	}
 	fmt.Println(style, name)
-	io.WriteString(w, delete(server, db_serial, style, name))
+	io.WriteString(w, delete(server, dbSerial, style, name))
 }
 
 // modify key name
@@ -195,16 +193,16 @@ func modifyTypeName(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Server", "Go Server")
 	server := r.URL.Query().Get(`server`)
-	db_serial := r.URL.Query().Get(`db`)
+	dbSerial := r.URL.Query().Get(`db`)
 	style := r.URL.Query().Get(`style`)
 	oldname := r.URL.Query().Get(`oldname`)
 	newname := r.URL.Query().Get(`newname`)
-	if server == `` || db_serial == `` {
+	if server == `` || dbSerial == `` {
 		io.WriteString(w, `{}`)
 		return
 	}
 	fmt.Println(style, oldname, newname)
-	io.WriteString(w, modify(server, db_serial, style, oldname, newname))
+	io.WriteString(w, modify(server, dbSerial, style, oldname, newname))
 }
 
 // saveChangeContent change content
@@ -212,17 +210,17 @@ func saveChangeContent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Server", "Go Server")
 	server := r.URL.Query().Get(`server`)
-	db_serial := r.URL.Query().Get(`db`)
+	dbSerial := r.URL.Query().Get(`db`)
 	style := r.URL.Query().Get(`style`)
 	name := r.URL.Query().Get(`name`)
 	field := r.URL.Query().Get(`field`)
 	index := r.URL.Query().Get(`index`)
 	content := r.URL.Query().Get(`content`)
-	if server == `` || db_serial == `` {
+	if server == `` || dbSerial == `` {
 		io.WriteString(w, `{}`)
 		return
 	}
-	io.WriteString(w, changeContent(server, db_serial, style, name, index, field, content))
+	io.WriteString(w, changeContent(server, dbSerial, style, name, index, field, content))
 }
 
 // execInstruction responsible for the front end of the interface to interact with the terminal

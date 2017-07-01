@@ -1,5 +1,6 @@
 package main
 
+// RedisConfig define redis-config
 type RedisConfig struct {
 	Port           string `json:"port"`
 	Bind           string `json:"bind"`
@@ -77,18 +78,21 @@ type RedisConfig struct {
 	AofRewriteIncrementalFsync string `json:"aof-rewrite-incremental-fsync"`
 }
 
+// ConfigInfo style of redisvo.toml
 type ConfigInfo struct {
 	ServerAddress string `toml:"server_address"`
 	AuthInfo      Auth   `toml:"auth_info"`
 	ServerInfo    []Info `toml:"server_info"`
 }
 
+// Auth authentic struct
 type Auth struct {
 	Admin    string `toml:"admin"`
 	Password string `toml:"password"`
 	Enable   int    `toml:"enable"`
 }
 
+//Info field of configInfo struct
 type Info struct {
 	Name string `toml:"name"`
 	Host string `toml:"host"`
@@ -96,6 +100,7 @@ type Info struct {
 	Auth string `toml:"auth"`
 }
 
+// ServerExtInfo summary of redis-server
 type ServerExtInfo struct {
 	ServerAddr   string `json:"serveraddr"`
 	UserMemory   string `json:"user_memory"`
@@ -105,6 +110,7 @@ type ServerExtInfo struct {
 	KeyNumber    string `json:"key_number"`
 }
 
+// RedisTypeName type and name of key
 type RedisTypeName struct {
 	TypeNames         []TypeName `json:"typename"`
 	KeysNamesWithType struct {
@@ -114,6 +120,7 @@ type RedisTypeName struct {
 	Contents string `json:"content"`
 }
 
+// RedisTypeName json style response of http request
 type RedisKeyName struct {
 	KeysNamesWithType struct {
 		KeysNames    []KeyName `json:"keysname"`
@@ -122,21 +129,27 @@ type RedisKeyName struct {
 	Contents string `json:"content"`
 }
 
+// TypeName
 type TypeName struct {
 	Type string `json:"type"`
 	Name string `json:"name"`
 }
 
+// KeyName
 type KeyName struct {
 	Name  string `json:"name"`
 	Index int    `json:"index"`
 	Score int    `json:"score"`
 }
 
+// MonitorInfo
 type MonitorInfo struct {
 	Message string `json:"message"`
 	Err     error  `json:"err"`
 }
+
+// Int64Slice
 type Int64Slice []int64
 
+// TypeNames
 type TypeNames []TypeName

@@ -19,18 +19,17 @@ import (
 // goroutine realMonitorTime
 func readMessage(conn *websocket.Conn) {
 	for {
-		_, server_info, err := conn.ReadMessage()
+		_, serverInfo, err := conn.ReadMessage()
 		if err != nil {
 			clientActiveClose <- true
 			return
 		}
-		if string(server_info) == `Ctrl+C` {
-			ctrlcMessage <- string(server_info)
-			receiveOver <- string(server_info)
+		if string(serverInfo) == `Ctrl+C` {
+			ctrlcMessage <- string(serverInfo)
+			receiveOver <- string(serverInfo)
 			return
-		} else {
-			serverMessage <- string(server_info)
 		}
+		serverMessage <- string(serverInfo)
 	}
 }
 
@@ -38,20 +37,20 @@ func readMessage(conn *websocket.Conn) {
 func realMonitorTime() {
 	var client *goredis.Redis
 	var monitor *goredis.MonitorCommand
-	var info_slice []string
-	var server_info string
+	var infoSlice []string
+	var serverInfo string
 	server := <-serverMessage
 	if strings.Contains(server, "_") {
-		info_slice = strings.Split(server, "_")
-		server_info = info_slice[0]
+		infoSlice = strings.Split(server, "_")
+		serverInfo = infoSlice[0]
 	} else {
-		server_info = server
+		serverInfo = server
 	}
-	if _, ok := goRedisMap[server_info]; ok {
-		client = goRedisMap[server_info]
+	if _, ok := goRedisMap[serverInfo]; ok {
+		client = goRedisMap[serverInfo]
 	} else {
-		client, _ = Dial(server_info, "")
-		goRedisMap[server_info] = client
+		client, _ = Dial(serverInfo, "")
+		goRedisMap[serverInfo] = client
 	}
 	monitor, err := client.Monitor()
 	if err != nil {
@@ -66,15 +65,15 @@ func realMonitorTime() {
 			return
 		case <-t.C:
 			h, err := monitor.Receive()
-			if len(info_slice) == 0 {
+			if len(infoSlice) == 0 {
 				MonitorMessage <- MonitorInfo{Message: h, Err: err}
 			}
-			if len(info_slice) > 0 {
-				pipe := strings.Split(info_slice[1], " ")
+			if len(infoSlice) > 0 {
+				pipe := strings.Split(infoSlice[1], " ")
 				if pipe[0] == `findstr` || pipe[0] == `grep` {
-					up_stirng := strings.ToUpper(strings.Trim(pipe[1], `"`))
-					low_stirng := strings.ToLower(strings.Trim(pipe[1], `"`))
-					if strings.Contains(h, up_stirng) || strings.Contains(h, low_stirng) {
+					upStirng := strings.ToUpper(strings.Trim(pipe[1], `"`))
+					lowStirng := strings.ToLower(strings.Trim(pipe[1], `"`))
+					if strings.Contains(h, upStirng) || strings.Contains(h, lowStirng) {
 						MonitorMessage <- MonitorInfo{Message: h, Err: err}
 					}
 				} else {
@@ -124,7 +123,7 @@ func getConfigInfoFromServer(server string) string {
 		name := t.Field(i).Tag.Get("json")
 		redisConfMap[name] = ""
 	}
-	for k, _ := range redisConfMap {
+	for k := range redisConfMap {
 		conf, err := redis.StringMap(rdsConn.Do("config", "get", k))
 		if err != nil {
 			fmt.Println(err)
@@ -314,7 +313,7 @@ func getTypeNameAndKeyByDb(server, db, showmore string) string {
 }
 
 // getTypeNameAndKeyBySearchKey search for redis key
-func getTypeNameAndKeyBySearchKey(server, db, search_key, showmore string) string {
+func getTypeNameAndKeyBySearchKey(server, db, searchKey, showmore string) string {
 	var buf []byte
 	var rdsTypeName RedisTypeName
 	var typeNames TypeNames
@@ -328,7 +327,7 @@ func getTypeNameAndKeyBySearchKey(server, db, search_key, showmore string) strin
 		fmt.Println(err)
 		return `{"typename":[],"keysnameswithtype":{"keysname":[]},"content":""}`
 	}
-	redisReply, err := redis.Strings(rdsConn.Do("keys", "*"+search_key+"*"))
+	redisReply, err := redis.Strings(rdsConn.Do("keys", "*"+searchKey+"*"))
 	if err != nil {
 		fmt.Println(err)
 		return `{"typename":[],"keysnameswithtype":{"keysname":[]},"content":""}`
@@ -381,7 +380,7 @@ func getKeyContentByTypeNameorKey(server, db, style, name, showmore string) stri
 }
 
 // getContentByTypeNameAndKey according redis one key or one field to get value
-func getContentByTypeNameAndKey(server, db, style, name, key_name string) string {
+func getContentByTypeNameAndKey(server, db, style, name, keyName string) string {
 	var buf []byte
 	var rdsKeyName RedisKeyName
 	var keyNames []KeyName
@@ -393,7 +392,7 @@ func getContentByTypeNameAndKey(server, db, style, name, key_name string) string
 		fmt.Println(err)
 		return `{"typename":[],"keysnameswithtype":{"keysname":[]},"content":""}`
 	}
-	content = getContentByTypeNameAnd(rdsConn, style, name, key_name)
+	content = getContentByTypeNameAnd(rdsConn, style, name, keyName)
 	rdsKeyName.KeysNamesWithType.KeysNames = keyNames
 	rdsKeyName.KeysNamesWithType.SelfTypeName = TypeName{Type: style, Name: name}
 	rdsKeyName.Contents = content
@@ -402,15 +401,15 @@ func getContentByTypeNameAndKey(server, db, style, name, key_name string) string
 }
 
 // getInfo by command of info
-func getInfo(c redis.Conn, info_key, dbno string) int64 {
-	var cnt int64 = 0
-	value, err := redis.String(c.Do("info", info_key))
+func getInfo(c redis.Conn, infoKey, dbno string) int64 {
+	var cnt int64
+	value, err := redis.String(c.Do("info", infoKey))
 	if err != nil {
 		return int64(0)
 	}
-	for _, sub_string := range strings.Split(value, ",") {
-		if sub_string != `` && strings.Contains(sub_string, "db"+dbno+":keys=") {
-			cnt, _ = strconv.ParseInt(strings.Split(sub_string, "=")[1], 10, 32)
+	for _, subString := range strings.Split(value, ",") {
+		if subString != `` && strings.Contains(subString, "db"+dbno+":keys=") {
+			cnt, _ = strconv.ParseInt(strings.Split(subString, "=")[1], 10, 32)
 			break
 		}
 	}
@@ -455,21 +454,20 @@ func moreFieldName(sumShowNumber, more int64, keyNames []KeyName) []KeyName {
 	var moreFlag, natureShowNumber int64
 	if sumShowNumber <= SHOWMAXROW {
 		return keyNames
-	} else {
-		var needShowNumber = SHOWMAXROW * (more + 1)
-		if needShowNumber < sumShowNumber {
-			natureShowNumber = needShowNumber
-			moreFlag = 1
-		} else {
-			moreFlag = 0
-			natureShowNumber = sumShowNumber
-		}
-		keyNames = keyNames[:natureShowNumber]
-		if moreFlag == 1 {
-			keyNames = append(keyNames, KeyName{Name: "More"})
-		}
-		return keyNames
 	}
+	var needShowNumber = SHOWMAXROW * (more + 1)
+	if needShowNumber < sumShowNumber {
+		natureShowNumber = needShowNumber
+		moreFlag = 1
+	} else {
+		moreFlag = 0
+		natureShowNumber = sumShowNumber
+	}
+	keyNames = keyNames[:natureShowNumber]
+	if moreFlag == 1 {
+		keyNames = append(keyNames, KeyName{Name: "More"})
+	}
+	return keyNames
 }
 
 // batchDeletion suuport redis batch delete keys
