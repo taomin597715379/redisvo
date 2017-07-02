@@ -29,19 +29,17 @@ redisvo is a web-based Redis server written in Go and works on Windows, Linux an
 [Precompiled binaries](https://github.com/taomin597715379/redisvo/releases) for supported 
 operating systems are available.
 
+## Contributing
+
+Contributions are welcome! Open a pull request to fix a bug, or open an issue to discuss a new feature or change.
+
+## Licenses
+
+This program is under the terms of the MIT License. See LICENSE for the full license text.
+
 ## Interactive page
 
 ![github.com/taomin597715379/redisvo](./doc/index.png)
 ![github.com/taomin597715379/redisvo](./doc/main.png)
 ![github.com/taomin597715379/redisvo](./doc/cli.png)
 ![github.com/taomin597715379/redisvo](./doc/config.png)
-
-## Contributing
-
-Contributions are welcome! Open a pull request to fix a bug, or open an issue to discuss a new feature or change.
-
-## Credits
-
-## Licenses
-
-This program is under the terms of the MIT License. See LICENSE for the full license text.
