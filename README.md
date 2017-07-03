@@ -1,3 +1,5 @@
+![redisvo](./logo.png)
+
 # Redis-Vo
 
 [![GoDoc](https://godoc.org/github.com/taomin597715379/redisvo?status.svg)](https://godoc.org/github.com/taomin597715379/redisvo)
