@@ -2,9 +2,9 @@
 
 # Redis-Vo
 
-[![GoDoc](https://godoc.org/github.com/taomin597715379/redisvo?status.svg)](https://godoc.org/github.com/taomin597715379/redisvo)
 [![Go Report Card](https://goreportcard.com/badge/github.com/taomin597715379/redisvo)](https://goreportcard.com/report/github.com/taomin597715379/redisvo)
-[![Licenses](https://img.shields.io/badge/license-bsd-orange.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![Downloads](https://img.shields.io/github/downloads/taomin597715379/redisvo/total.svg)](https://github.com/taomin597715379/redisvo/releases)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/taomin597715379/redisvo/blob/master/LICENSE)
 
 ## Overview
 
@@ -43,7 +43,7 @@ Logo is designed by [xuri](https://github.com/Luxurioust)
 
 This program is under the terms of the MIT License. See LICENSE for the full license text.
 
-## Interactive page
+## Screenshot
 
 ![github.com/taomin597715379/redisvo](./doc/index.png)
 ![github.com/taomin597715379/redisvo](./doc/main.png)
