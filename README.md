@@ -35,6 +35,10 @@ operating systems are available.
 
 Contributions are welcome! Open a pull request to fix a bug, or open an issue to discuss a new feature or change.
 
+## Credits
+
+Logo is designed by [xuri](https://github.com/Luxurioust)
+
 ## Licenses
 
 This program is under the terms of the MIT License. See LICENSE for the full license text.
