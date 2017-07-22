@@ -311,38 +311,51 @@ func getKeysByTypeName(rdsConn redis.Conn, typ, name string) (keyNames []KeyName
 // others server info will be sort by ip
 func getServerInfos() string {
 	var buf []byte
+	var wg sync.WaitGroup
+	var l0, l1 sync.RWMutex
 	var conf ConfigInfo
 	var serverInfosIncVersion ServerExtInfoIncVersion
 	var serverInfos []ServerExtInfo
 	var serverOnline = make(map[int64]ServerExtInfo, 0)
 	var serverNoOnline = make(map[int64]ServerExtInfo, 0)
-	var s ServerExtInfo
 	_, err := toml.DecodeFile(dir+SELF_CONF_FILE, &conf)
 	if err != nil {
-		return ""
+		return ``
 	}
+	wg.Add(len(conf.ServerInfo))
 	for _, serverInfo := range conf.ServerInfo {
-		timeout := time.Duration(100) * time.Millisecond
-		if c, err := redis.DialTimeout("tcp", serverInfo.Host+":"+serverInfo.Port, timeout, timeout, timeout); err == nil {
-			version, memory, clients, commands, count := getInfoByField(c)
-			s = ServerExtInfo{ServerAddr: serverInfo.Host + ":" + serverInfo.Port,
-				UserMemory:   memory,
-				ClientOnline: clients,
-				ExeCommand:   commands,
-				RedisVer:     version,
-				KeyNumber:    count}
-			c.Close()
-			serverOnline[ipToInteger(serverInfo.Host)+portToInteger(serverInfo.Port)] = s
-		} else {
-			s = ServerExtInfo{ServerAddr: serverInfo.Host + ":" + serverInfo.Port,
-				UserMemory:   "-",
-				ClientOnline: "-",
-				ExeCommand:   "-",
-				RedisVer:     "-",
-				KeyNumber:    "-"}
-			serverNoOnline[ipToInteger(serverInfo.Host)+portToInteger(serverInfo.Port)] = s
-		}
+		go func(serverInfo Info) {
+			timeout := time.Duration(100) * time.Millisecond
+			if c, err := redis.DialTimeout("tcp", serverInfo.Host+":"+serverInfo.Port, timeout, timeout, timeout); err == nil {
+				version, memory, clients, commands, count := getInfoByField(c)
+				is_cluster := getClusterState(serverInfo.Host + ":" + serverInfo.Port)
+				s := ServerExtInfo{ServerAddr: serverInfo.Host + ":" + serverInfo.Port,
+					UserMemory:    memory,
+					ClientOnline:  clients,
+					ExeCommand:    commands,
+					RedisVer:      version,
+					KeyNumber:     count,
+					ClusterEnable: is_cluster}
+				c.Close()
+				l0.Lock()
+				serverOnline[ipToInteger(serverInfo.Host)+portToInteger(serverInfo.Port)] = s
+				l0.Unlock()
+			} else {
+				s := ServerExtInfo{ServerAddr: serverInfo.Host + ":" + serverInfo.Port,
+					UserMemory:    "-",
+					ClientOnline:  "-",
+					ExeCommand:    "-",
+					RedisVer:      "-",
+					KeyNumber:     "-",
+					ClusterEnable: "-"}
+				l1.Lock()
+				serverNoOnline[ipToInteger(serverInfo.Host)+portToInteger(serverInfo.Port)] = s
+				l1.Unlock()
+			}
+			wg.Done()
+		}(serverInfo)
 	}
+	wg.Wait()
 	tmpInfo := sortServerInfo(serverOnline)
 	serverInfos = append(serverInfos, tmpInfo...)
 	tmpInfo = sortServerInfo(serverNoOnline)
