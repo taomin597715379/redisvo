@@ -37,7 +37,7 @@ Contributions are welcome! Open a pull request to fix a bug, or open an issue to
 
 ## Credits
 
-Logo is designed by [xuri](https://github.com/Luxurioust)
+Logo is designed by [Ri Xu](https://xuri.me)
 
 ## Licenses
 

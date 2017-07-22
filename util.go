@@ -8,6 +8,7 @@ import (
 	"github.com/garyburd/redigo/redis"
 	"github.com/xuyu/goredis"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"sort"
 	"strconv"
@@ -48,11 +49,16 @@ var cacheRedisConf = make(map[string]map[string]string, 0)
 // dir
 var dir string
 
+var needUpdateVersion bool = false
+
 // MAXFIELDNUMBER only show the max of key and
 // SELF_CONF_FILE is relative path
+// UpdateURL new version pull url
 const (
 	MAXFIELDNUMBER = 100000
 	SELF_CONF_FILE = string(os.PathSeparator) + `redisvo.toml`
+	UpdateURL      = `https://api.github.com/repos/taomin597715379/redisvo/tags`
+	Version        = `1.0`
 )
 
 // Len interface int64Slice struct implement
@@ -70,19 +76,19 @@ func (c Int64Slice) Less(i, j int) bool {
 	return c[i] < c[j]
 }
 
-// Len interface typeNames struct implement
-func (u TypeNames) Len() int {
-	return len(u)
+// Len interface StringSlice struct implement
+func (s StringSlice) Len() int {
+	return len(s)
 }
 
-// Less interface typeNames struct implement
-func (u TypeNames) Less(i, j int) bool {
-	return u[i].Name < u[j].Name
+// Swap interface StringSlice struct implement
+func (s StringSlice) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
 }
 
-// Swap interface typeNames struct implement
-func (u TypeNames) Swap(i, j int) {
-	u[i], u[j] = u[j], u[i]
+// Less interface StringSlice struct implement
+func (s StringSlice) Less(i, j int) bool {
+	return s[i] < s[j]
 }
 
 // getConnectFromPool Each redis-server: ip, port and a redis-connect mapping
@@ -306,6 +312,7 @@ func getKeysByTypeName(rdsConn redis.Conn, typ, name string) (keyNames []KeyName
 func getServerInfos() string {
 	var buf []byte
 	var conf ConfigInfo
+	var serverInfosIncVersion ServerExtInfoIncVersion
 	var serverInfos []ServerExtInfo
 	var serverOnline = make(map[int64]ServerExtInfo, 0)
 	var serverNoOnline = make(map[int64]ServerExtInfo, 0)
@@ -340,7 +347,12 @@ func getServerInfos() string {
 	serverInfos = append(serverInfos, tmpInfo...)
 	tmpInfo = sortServerInfo(serverNoOnline)
 	serverInfos = append(serverInfos, tmpInfo...)
-	buf, _ = json.Marshal(serverInfos)
+	serverInfosIncVersion.ServerExtInfos = serverInfos
+	isneed, now_version, update_verison := checkUpdate()
+	serverInfosIncVersion.IsUpdateVersion = isneed
+	serverInfosIncVersion.NowVersion = now_version
+	serverInfosIncVersion.UpdateVersion = update_verison
+	buf, _ = json.Marshal(serverInfosIncVersion)
 	return string(buf)
 }
 
@@ -517,4 +529,33 @@ func isValidate() bool {
 		return true
 	}
 	return false
+}
+
+// checkUpdate render update notice alert
+func checkUpdate() (bool, string, string) {
+	if needUpdateVersion != false {
+		return needUpdateVersion, Version, Version
+	}
+	r, err := http.Get(UpdateURL)
+	if err != nil {
+		return needUpdateVersion, Version, Version
+	}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		r.Body.Close()
+		return needUpdateVersion, Version, Version
+	}
+	r.Body.Close()
+	u := UpdateTags{}
+	err = json.Unmarshal(body, &u)
+	if err != nil {
+		return needUpdateVersion, Version, Version
+	}
+	if len(u) < 1 {
+		return needUpdateVersion, Version, Version
+	}
+	if Version < u[0].Name {
+		needUpdateVersion = true
+	}
+	return needUpdateVersion, Version, u[0].Name
 }

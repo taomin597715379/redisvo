@@ -100,7 +100,15 @@ type Info struct {
 	Auth string `toml:"auth"`
 }
 
-// ServerExtInfo summary of redis-server
+// ServerExtInfoIncVersion include version info and redis-server info
+type ServerExtInfoIncVersion struct {
+	NowVersion      string          `json:"now_version"`
+	UpdateVersion   string          `json:"update_version"`
+	IsUpdateVersion bool            `json:"is_update_version"`
+	ServerExtInfos  []ServerExtInfo `json:"server_ext_infos"`
+}
+
+// ServerExtInfo include redis-server info
 type ServerExtInfo struct {
 	ServerAddr   string `json:"serveraddr"`
 	UserMemory   string `json:"user_memory"`
@@ -151,5 +159,11 @@ type MonitorInfo struct {
 // Int64Slice descrbie []int64
 type Int64Slice []int64
 
-// TypeNames descrbie []TypeName
+type StringSlice []string
+
 type TypeNames []TypeName
+
+// UpdateTags define the tag of versions control.
+type UpdateTags []struct {
+	Name string `json:"name"`
+}

@@ -216,6 +216,8 @@ $(document).ready(function() {
 	var typeName = new Vue({
 		el: '#leftbar',
 	  	data: {
+	  		name: null, 
+	  		isNameValid: false,
 	  		viewMenu: false,
 	  	 	keys: [],
 	  	 	show_more_flag: 0,
@@ -227,6 +229,9 @@ $(document).ready(function() {
     		timer: null,
 	  	},
 	  	methods: {
+	  		inputName: function() {
+	  			this.isNameValid = false;
+	  		},
 	  		notify: function(index, type, name) {
 	  			this.$broadcast('contextmenu-info', index, type, name)
 	  		},
@@ -297,9 +302,12 @@ $(document).ready(function() {
 		    	var server_info = getUrlParameter('server')
 				var dbno = $('a.selected').children("span").text();
 				var type = $('#addtypename select').val();
-				var key = $('#server-name').val();
+				// var key = $('#server-name').val();
+				var key = this.name;
 				var host = $(location).attr('host');
-				if(key !="" && host !="") {
+				if(key == null || key == "") {
+					this.isNameValid = true;
+				} else if(host != ""){
 					$.ajax({
 						'url':"http://"+host+"/addkey?server=" + server_info + "&db=" + dbno + 
 																"&style=" + type + "&name=" + key,
@@ -359,6 +367,7 @@ $(document).ready(function() {
 		    	if(activeIcon == "Content") {
 			    	if(type == "string") {
 			    		if($("#rightbar").hasClass('col-md-6')) {
+			    			$('#rightbar').css("width", 1170 - $('#leftbar').width());
 							$("#rightbar").toggleClass('col-md-6 col-md-9');
 			    		}
 			    		$("#midbar").hide();
@@ -439,6 +448,14 @@ $(document).ready(function() {
 	var keysName = new Vue({
 		el: '#midbar',
 	  	data: {
+	  		isKeyKeyValid: false,
+	  		isItemValueValid: false,
+	  		isMemberValueValid: false,
+	  		isZmemberValueValid: false,
+	  		key_key: null,
+	  		item_value: null,
+	  		member_value: null,
+	  		zmember_value: null,
 	  	 	keys: [],
 	  	 	selftypename: null,
 	  	 	show_more_flag: 0,
@@ -448,6 +465,12 @@ $(document).ready(function() {
 	  	 	zset_index_show: false,
 	  	},
 	  	methods: {
+	  		inputModal: function() {
+	  			this.isKeyKeyValid = false;
+	  			this.isItemValueValid = false;
+	  			this.isMemberValueValid = false;
+	  			this.isZmemberValueValid = false;
+	  		},
 		    fetchData: function(obj) {
 		    	if(obj != null && obj.hasOwnProperty('keysname') &&
 		    		obj.keysname != null && obj.keysname.length == 0) {
@@ -489,18 +512,32 @@ $(document).ready(function() {
 		    	switch (this.keytitle) {
 		    		case "key":
 						add_value = $('#key input').val();
+						if(add_value == null || add_value == "") {
+							this.isKeyKeyValid = true;
+						}
 						break;
 		    		case "item":
 		    			add_value = $('#item input').val();
+		    			if(add_value == null || add_value == "") {
+				    		this.isItemValueValid = true;
+				    		return
+				    	}
 		    			insert_flag = $('#item select').val();
 		    			add_value = insert_flag + "_" + add_value;
 		    			break;
 		    		case "member":
 		    			add_value = $('#member input').val();
+		    			if(add_value == null || add_value == "") {
+				    		this.isMemberValueValid = true;
+				    	}
 		    			break;
 		    		case "zmember":
 		    			add_value = $("#zmember input[name='value']").val();
 		    			insert_flag = $("#zmember input[name='score']").val();
+		    			if(add_value == null || add_value == "") {
+				    		this.isZmemberValueValid = true;
+				    		return 
+				    	}
 		    			add_value = insert_flag + "_" + add_value;
 		    			break;
 		    		default:

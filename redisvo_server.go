@@ -417,8 +417,9 @@ func getInfo(c redis.Conn, infoKey, dbno string) int64 {
 }
 
 // moreTypeName supports show more of key
-func moreTypeName(sumShowNumber, more int64, redisReply []string, rdsConn redis.Conn) (typeNames TypeNames) {
+func moreTypeName(sumShowNumber, more int64, redisReply StringSlice, rdsConn redis.Conn) (typeNames TypeNames) {
 	var i, moreFlag, natureShowNumber int64
+	sort.Sort(redisReply)
 	if sumShowNumber <= SHOWMAXROW {
 		for _, name := range redisReply {
 			tp, _ := redis.String(rdsConn.Do("type", name))
@@ -442,7 +443,7 @@ func moreTypeName(sumShowNumber, more int64, redisReply []string, rdsConn redis.
 			}
 		}
 	}
-	sort.Sort(typeNames)
+	// sort.Sort(typeNames)
 	if moreFlag == 1 {
 		typeNames = append(typeNames, TypeName{Type: "", Name: "More"})
 	}
