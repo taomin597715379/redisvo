@@ -35,6 +35,7 @@ func main() {
 	http.HandleFunc("/changeContent", saveChangeContent)
 	http.HandleFunc("/terminal", execInstruction)
 	http.HandleFunc("/", getMainInterface)
+
 	go func(serverAddress string) {
 		if err := http.ListenAndServe(serverAddress, nil); err != nil {
 			panic("Binding service ip and port error, please check whether the port is occupied and then restart ... ")
