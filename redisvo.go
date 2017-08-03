@@ -18,6 +18,9 @@ func main() {
 		}
 		fmt.Printf("redisvo Exited ...\n")
 	}()
+	if err := createConfigFile(); err != nil {
+		fmt.Printf("create redisvo.toml error: %v", err)
+	}
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/config", getConfigInfo)
 	http.HandleFunc("/monitor", redisMonitorRealTime)

@@ -56,7 +56,7 @@ var needUpdateVersion bool = false
 // UpdateURL new version pull url
 const (
 	MAXFIELDNUMBER = 100000
-	SELF_CONF_FILE = string(os.PathSeparator) + `redisvo.toml`
+	SELF_CONF_FILE = `.` + string(os.PathSeparator) + `redisvo.toml`
 	UpdateURL      = `https://api.github.com/repos/taomin597715379/redisvo/tags`
 	Version        = `1.0`
 )
@@ -394,6 +394,37 @@ func removeServerInfo(name string) string {
 		return "Error"
 	}
 	return "OK"
+}
+
+// createConfigFile the process just creates the file when it starts
+func createConfigFile() error {
+	var conf ConfigInfo
+	var sBuffer bytes.Buffer
+	if _, err := os.Stat(dir + SELF_CONF_FILE); os.IsNotExist(err) {
+		f, err := os.Create(dir + SELF_CONF_FILE)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		conf.ServerInfo = append(conf.ServerInfo, Info{
+			Name: `127.0.0.1`, Host: `127.0.0.1`,
+			Port: `6379`, Auth: ``})
+		if conf.ServerAddress == `` {
+			conf.ServerAddress = `127.0.0.1:7000`
+		}
+		if conf.AuthInfo == (Auth{}) {
+			conf.AuthInfo = Auth{Admin: "", Password: "", Enable: 0}
+		}
+		err = toml.NewEncoder(&sBuffer).Encode(conf)
+		if err != nil {
+			return err
+		}
+		err = ioutil.WriteFile(dir+SELF_CONF_FILE, []byte(sBuffer.String()), 0644)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // writeServerToml add redis-server info and write into config file
