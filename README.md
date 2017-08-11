@@ -17,6 +17,7 @@ redisvo is a web-based Redis server written in Go and works on Windows, Linux an
 - Zero dependencies
 - Each user can add its own personal Redis server
 - Search key
+- Search fields of the key
 - Timer refresh keys
 - Web-cli interactive mode
 - Change redis-config file easily
