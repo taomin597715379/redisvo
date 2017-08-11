@@ -275,7 +275,7 @@ func getTypeNameAndKeyByDb(server, db, showmore string) string {
 	var buf []byte
 	var rdsTypeName RedisTypeName
 	var typeNames TypeNames
-	var keyNames []KeyName
+	var keyNames KeyNameSlice
 	var content string
 	dbno, _ := strconv.ParseInt(db, 10, 0)
 	more, _ := strconv.ParseInt(showmore, 10, 0)
@@ -317,7 +317,7 @@ func getTypeNameAndKeyBySearchKey(server, db, searchKey, showmore string) string
 	var buf []byte
 	var rdsTypeName RedisTypeName
 	var typeNames TypeNames
-	var keyNames []KeyName
+	var keyNames KeyNameSlice
 	var content string
 	dbno, _ := strconv.ParseInt(db, 10, 0)
 	more, _ := strconv.ParseInt(showmore, 10, 0)
@@ -358,7 +358,7 @@ func getTypeNameAndKeyBySearchKey(server, db, searchKey, showmore string) string
 func getKeyContentByTypeNameorKey(server, db, style, name, showmore string) string {
 	var buf []byte
 	var rdsKeyName RedisKeyName
-	var keyNames []KeyName
+	var keyNames KeyNameSlice
 	var content string
 	dbno, _ := strconv.ParseInt(db, 10, 0)
 	more, _ := strconv.ParseInt(showmore, 10, 0)
@@ -379,11 +379,49 @@ func getKeyContentByTypeNameorKey(server, db, style, name, showmore string) stri
 	return string(buf)
 }
 
+// searchFieldByKey search field by key
+func searchFieldByKey(server, db, style, name, showmore, key_name string) string {
+	var buf []byte
+	var rdsKeyName RedisKeyName
+	var keyNames KeyNameSlice
+	var searchKeyRet KeyNameSlice
+	var content string
+	dbno, _ := strconv.ParseInt(db, 10, 0)
+	more, _ := strconv.ParseInt(showmore, 10, 0)
+	rdsConn := getConnectFromPool(server)
+	defer rdsConn.Close()
+	if _, err := redis.String(rdsConn.Do("select", dbno)); err != nil {
+		fmt.Println(err)
+		return `{"typename":[],"keysnameswithtype":{"keysname":[]},"content":""}`
+	}
+	keyNames, content = getKeysByTypeName(rdsConn, style, name)
+	if key_name != `` {
+		for _, v := range keyNames {
+			if strings.Contains(v.Name, key_name) {
+				searchKeyRet = append(searchKeyRet, v)
+			}
+		}
+		if len(searchKeyRet) == 0 {
+			keyNames = []KeyName{}
+		} else {
+			keyNames = searchKeyRet
+			content = getContentByTypeNameAnd(rdsConn, style, name, searchKeyRet[0].Name)
+		}
+	}
+	sumShowNumber := int64(len(keyNames))
+	keyNames = moreFieldName(sumShowNumber, more, keyNames)
+	rdsKeyName.KeysNamesWithType.KeysNames = keyNames
+	rdsKeyName.KeysNamesWithType.SelfTypeName = TypeName{Type: style, Name: name}
+	rdsKeyName.Contents = content
+	buf, _ = json.Marshal(rdsKeyName)
+	return string(buf)
+}
+
 // getContentByTypeNameAndKey according redis one key or one field to get value
 func getContentByTypeNameAndKey(server, db, style, name, keyName string) string {
 	var buf []byte
 	var rdsKeyName RedisKeyName
-	var keyNames []KeyName
+	var keyNames KeyNameSlice
 	var content string
 	dbno, _ := strconv.ParseInt(db, 10, 0)
 	rdsConn := getConnectFromPool(server)
@@ -450,9 +488,10 @@ func moreTypeName(sumShowNumber, more int64, redisReply StringSlice, rdsConn red
 	return typeNames
 }
 
-// moreTypeName supports show more of field
-func moreFieldName(sumShowNumber, more int64, keyNames []KeyName) []KeyName {
+// moreFieldName supports show more of field
+func moreFieldName(sumShowNumber, more int64, keyNames KeyNameSlice) KeyNameSlice {
 	var moreFlag, natureShowNumber int64
+	sort.Sort(keyNames)
 	if sumShowNumber <= SHOWMAXROW {
 		return keyNames
 	}

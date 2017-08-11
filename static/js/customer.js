@@ -100,6 +100,8 @@ $(document).ready(function() {
 		    minWidth: 250,
 		    resize: function(e, ui) {
                 $('#rightbar').css("width", 1170 - $('#leftbar').width() - $('#midbar').width());
+                var midbar_width = $("#midbar").width();
+                $(".searchbox").css("width", midbar_width - 150);
             }
 	});
 	$('#dbdropdown > li > a').click(function(e){
@@ -201,7 +203,7 @@ $(document).ready(function() {
 	$('#type-name').css("width", "")
 	$('#keys-name').css("width", "")
 	$('#type-name').css("margin-top", -39);
-	$('#keys-name').css("margin-top", -39);
+	$('#keys-name').css("margin-top", -49);
 	$('#leftbar thead tr th:eq(1)').css('padding-right', 5);
 	$('#midbar thead tr th:eq(2)').css('padding-right', 5);
 	
@@ -465,6 +467,41 @@ $(document).ready(function() {
 	  	 	zset_index_show: false,
 	  	},
 	  	methods: {
+	  		searchField: function() {
+	  			$(document).keypress(function(e) {
+				    if(e.which == 13) {
+				    	e.preventDefault();
+      					return ;
+				    }
+				});
+		    	var server_info = getUrlParameter('server')
+		    	var db = $('a.selected').children("span").text();
+		    	var host = $(location).attr('host');
+		    	$.ajax({
+					'url':"http://"+host+"/searchfield?server=" + server_info + "&db=" + db + "&style=" + this.selftypename.type + "&name=" +
+							 this.selftypename.name + "&field=" + this.search_field,
+				  	'success':function(result) {
+				  		console.log(result);
+				  		keysName.fetchData(result.keysnameswithtype);
+				  		content.fetchData(result.content)
+				  	},
+				  	'dataType':'json',
+					'error':function() {
+						console.log('error ajax ... ')
+					}
+				})
+	  		},
+	  		mouseOver: function() {
+	  			if(this.searchbox_show_flag == false) {
+	  				$('.searchbox').css('display','block');
+	  				$('#searchrefresh').css("color", "#5cb85c");
+	  				this.searchbox_show_flag = true;
+	  			} else {
+	  				$('.searchbox').css('display','none');
+	  				$('#searchrefresh').css("color", "");
+	  				this.searchbox_show_flag = false;
+	  			}
+	  		},
 	  		inputModal: function() {
 	  			this.isKeyKeyValid = false;
 	  			this.isItemValueValid = false;
@@ -473,10 +510,9 @@ $(document).ready(function() {
 	  		},
 		    fetchData: function(obj) {
 		    	if(obj != null && obj.hasOwnProperty('keysname') &&
-		    		obj.keysname != null && obj.keysname.length == 0) {
+		    		( obj.keysname == null || obj.keysname.length == 0 )) {
 		    		this.keys = [];
 		    		this.keytitle = "key";
-		    		this.index = "index";
 		    	}
 		    	if (obj.hasOwnProperty('keysname') && obj.keysname != null &&
 		    		obj.hasOwnProperty('selftypename') && obj.selftypename != null) {
@@ -485,17 +521,14 @@ $(document).ready(function() {
 			    	this.zset_index_show = false;
 			    	if(obj.selftypename.type == "hash") {
 						this.keytitle = "key";
-						this.index = "index";
 					}
 					if(obj.selftypename.type == "list") {
 						this.keytitle = "item";
-						this.index = "index";
 					}
 					if(obj.selftypename.type == "zset") {
 						this.keytitle = "zmember";
-						this.zset_index = "index";
+						this.zset_index = "score";
 						this.zset_index_show = true;
-						this.index = "score";
 					}
 					if(obj.selftypename.type == "set") {
 						this.keytitle = "member";
@@ -569,7 +602,7 @@ $(document).ready(function() {
 					})
 		    	}
 		    },
-		    getContentByKeys:function(index, key_name, index) {
+		    getContentByKeys:function(index, key_name) {
 		    	this.addShadow(index);
 		    	var server_info = getUrlParameter('server')
 		    	var db = $('a.selected').children("span").text();

@@ -31,6 +31,7 @@ func main() {
 	http.HandleFunc("/server", getServerKeyNameHtml)
 	http.HandleFunc("/serverinfo", getInfoByServerAndDb)
 	http.HandleFunc("/search", getInfoBySearchKey)
+	http.HandleFunc("/searchfield", searchFieldByTypeName)
 	http.HandleFunc("/showfields", getInfoByTypeNameorKey)
 	http.HandleFunc("/addkey", addFieldsByTypeAndName)
 	http.HandleFunc("/deletekey", deleteTypeName)

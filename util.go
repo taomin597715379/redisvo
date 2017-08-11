@@ -13,6 +13,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -89,6 +90,22 @@ func (s StringSlice) Swap(i, j int) {
 // Less interface StringSlice struct implement
 func (s StringSlice) Less(i, j int) bool {
 	return s[i] < s[j]
+}
+
+// Len interface KeyNameSlice struct implement
+func (s KeyNameSlice) Len() int {
+	return len(s)
+}
+
+// Swap interface KeyNameSlice struct implement
+func (s KeyNameSlice) Swap(i, j int) {
+	s[i].Name, s[j].Name = s[j].Name, s[i].Name
+	s[i].Score, s[j].Score = s[j].Score, s[i].Score
+}
+
+// Less interface KeyNameSlice struct implement
+func (s KeyNameSlice) Less(i, j int) bool {
+	return s[i].Name < s[j].Name
 }
 
 // getConnectFromPool Each redis-server: ip, port and a redis-connect mapping
@@ -293,7 +310,7 @@ func getKeysByTypeName(rdsConn redis.Conn, typ, name string) (keyNames []KeyName
 		if len(fields) > 0 {
 			for i := 0; i < len(fields); i = i + 2 {
 				j, _ := strconv.Atoi(fields[i+1])
-				keyNames = append(keyNames, KeyName{Name: fields[i], Index: l, Score: j})
+				keyNames = append(keyNames, KeyName{Name: fields[i], Score: j})
 				l++
 			}
 		}
@@ -328,26 +345,23 @@ func getServerInfos() string {
 			timeout := time.Duration(100) * time.Millisecond
 			if c, err := redis.DialTimeout("tcp", serverInfo.Host+":"+serverInfo.Port, timeout, timeout, timeout); err == nil {
 				version, memory, clients, commands, count := getInfoByField(c)
-				is_cluster := getClusterState(serverInfo.Host + ":" + serverInfo.Port)
 				s := ServerExtInfo{ServerAddr: serverInfo.Host + ":" + serverInfo.Port,
-					UserMemory:    memory,
-					ClientOnline:  clients,
-					ExeCommand:    commands,
-					RedisVer:      version,
-					KeyNumber:     count,
-					ClusterEnable: is_cluster}
+					UserMemory:   memory,
+					ClientOnline: clients,
+					ExeCommand:   commands,
+					RedisVer:     version,
+					KeyNumber:    count}
 				c.Close()
 				l0.Lock()
 				serverOnline[ipToInteger(serverInfo.Host)+portToInteger(serverInfo.Port)] = s
 				l0.Unlock()
 			} else {
 				s := ServerExtInfo{ServerAddr: serverInfo.Host + ":" + serverInfo.Port,
-					UserMemory:    "-",
-					ClientOnline:  "-",
-					ExeCommand:    "-",
-					RedisVer:      "-",
-					KeyNumber:     "-",
-					ClusterEnable: "-"}
+					UserMemory:   "-",
+					ClientOnline: "-",
+					ExeCommand:   "-",
+					RedisVer:     "-",
+					KeyNumber:    "-"}
 				l1.Lock()
 				serverNoOnline[ipToInteger(serverInfo.Host)+portToInteger(serverInfo.Port)] = s
 				l1.Unlock()
@@ -454,7 +468,7 @@ func writeServerToml(name, host, port, auth string) string {
 		conf.ServerInfo = append(conf.ServerInfo, c)
 	}
 	if conf.ServerAddress == `` {
-		conf.ServerAddress = `0.0.0.0:7000`
+		conf.ServerAddress = `127.0.0.1:7000`
 	}
 	if conf.AuthInfo == (Auth{}) {
 		conf.AuthInfo = Auth{Admin: "", Password: "", Enable: 0}

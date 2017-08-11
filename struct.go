@@ -146,7 +146,6 @@ type TypeName struct {
 // KeyName describe information of field
 type KeyName struct {
 	Name  string `json:"name"`
-	Index int    `json:"index"`
 	Score int    `json:"score"`
 }
 
@@ -162,6 +161,8 @@ type Int64Slice []int64
 type StringSlice []string
 
 type TypeNames []TypeName
+
+type KeyNameSlice []KeyName
 
 // UpdateTags define the tag of versions control.
 type UpdateTags []struct {

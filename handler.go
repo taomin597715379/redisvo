@@ -156,6 +156,26 @@ func getInfoByTypeNameorKey(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, getContentByTypeNameAndKey(server, dbSerial, style, name, keyName))
 }
 
+// searchFieldByTypeName search field by type and key name
+func searchFieldByTypeName(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Server", "Go Server")
+	server := r.URL.Query().Get(`server`)
+	dbSerial := r.URL.Query().Get(`db`)
+	style := r.URL.Query().Get(`style`)
+	name := r.URL.Query().Get(`name`)
+	keyName := r.URL.Query().Get(`field`)
+	var showmore = r.URL.Query().Get(`showmore`)
+	if server == `` || dbSerial == `` {
+		io.WriteString(w, `{}`)
+		return
+	}
+	if showmore == `` {
+		showmore = `0`
+	}
+	io.WriteString(w, searchFieldByKey(server, dbSerial, style, name, showmore, keyName))
+}
+
 // addKeysByTypeAndName add key by type and name
 func addFieldsByTypeAndName(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")

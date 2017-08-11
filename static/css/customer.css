@@ -21,6 +21,21 @@ body {
     font-weight: 200;
     height:40px; 
 }
+.searchbox {
+    position:relative;
+    min-width:80px;
+    width:0%;
+    height: 25px;
+    border-radius: 4px;
+    float:right;
+    overflow:hidden;
+    
+    -webkit-transition: width 0.3s;
+    -moz-transition: width 0.3s;
+    -ms-transition: width 0.3s;
+    -o-transition: width 0.3s;
+    transition: width 0.3s;
+}
 
 #search_input {
     border-radius: 4px;

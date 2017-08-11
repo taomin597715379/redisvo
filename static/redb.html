@@ -172,12 +172,16 @@
                     <thead>
                         <tr>
                             <th v-show="zset_index_show" v-text="zset_index"></th>
-                            <th v-cloak width="65" v-text="index"> </th>
                             <th>
                                 <span v-cloak v-text="keytitle"> </span>
                                 <span class="pull-right">
                                     <i data-target="#{{ keytitle }}" data-toggle="modal" href="#" class="fa fa-plus-square-o" ></i>
                                 </span>
+                                <span class="pull-right" style="padding-right: 8px;" v-on:click="mouseOver()">
+                                    <i id="searchrefresh" class="fa fa-search"></i>
+                                </span>
+                                <input class="searchbox" style="display: none;" v-model="search_field" type="search" placeholder="Search......" 
+                                    name="search" class="searchbox-input" v-on:keyup="searchField()" required>
                                 <div class="modal fade" id="key" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                                   <div class="modal-dialog modal-md">
                                     <div class="modal-content">
@@ -301,10 +305,9 @@
                     </thead>
                     <tbody>
                         <tr v-if="keys.length" id="retriever-task-{{ index }}" v-for="(index, key) in keys">
-                            <td v-show="zset_index_show" v-text="key.index"> </td>
-                            <td v-text="key.score"> </td>
+                            <td v-show="zset_index_show" v-text="key.score"> </td>
                             <td v-cloak v-on:click="getMoreFieldName()" v-if='key.name == "More"'> <a href="#" v-text="key.name"> </a> </td>
-                            <td v-cloak v-on:click="getContentByKeys(index, key.name, key.score)" v-else v-text="key.name"> </td>
+                            <td v-cloak v-on:click="getContentByKeys(index, key.name)" v-else v-text="key.name"> </td>
                         </tr>
                     </tbody>
                 </table>
