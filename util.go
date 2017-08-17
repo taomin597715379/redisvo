@@ -57,7 +57,7 @@ var needUpdateVersion bool = false
 // UpdateURL new version pull url
 const (
 	MAXFIELDNUMBER = 100000
-	SELF_CONF_FILE = `.` + string(os.PathSeparator) + `redisvo.toml`
+	SELF_CONF_FILE = string(os.PathSeparator) + `redisvo.toml`
 	UpdateURL      = `https://api.github.com/repos/taomin597715379/redisvo/tags`
 	Version        = `1.0`
 )
