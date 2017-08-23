@@ -200,13 +200,13 @@ $(document).ready(function() {
 		cloneHeadToFoot: true,
 	});
 	$('#rightbar').css("width", 1170 - $('#leftbar').width() - $('#midbar').width());
-	$('#type-name').css("width", "")
-	$('#keys-name').css("width", "")
-	$('#type-name').css("margin-top", -39);
-	$('#keys-name').css("margin-top", -49);
+	$('#type-name').css("width", "");
+	$('#keys-name').css("width", "");
+	$('#type-name').css("margin-top", "");
+	$('#keys-name').css("margin-top", "");
 	$('#leftbar thead tr th:eq(1)').css('padding-right', 5);
 	$('#midbar thead tr th:eq(2)').css('padding-right', 5);
-	
+	$(".fht-tbody table thead").remove();
 	var logo = new Vue({
 		el:'#navbar-nlogo',
 		methods: {
